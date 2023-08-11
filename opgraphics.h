@@ -42,7 +42,6 @@ namespace oppo::utility {
 
 namespace oppo {
 	/*TODO:
-	* WindowManager
 	* TextLayout
 	* TileMap
 	*/
@@ -115,7 +114,7 @@ namespace oppo {
 		RectF rect = RectF();
 		Point2F position = Point2F();
 		float rotation = 0;
-		float opacity = 0;
+		float opacity = 1;
 		Size2F scale = Size2F(1, 1);
 		Size2D spriteIndex = Size2D();
 
@@ -157,8 +156,8 @@ namespace oppo {
 		void DrawShape(Ellipse, Brush);
 		void DrawShape(Line, Brush);
 		void DrawShape(Bezier, Brush);
-		void DrawBitmap(Bitmap, RectF, float, RectF);
-		void DrawBitmap(Bitmap, RectF, float);
+		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect);
+		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f);
 		void DrawSprite(Sprite);
 		void DrawTileMap(TileMap);
 

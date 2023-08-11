@@ -2,9 +2,10 @@
 #include <iostream>
 
 oppo::Brush brush;
-oppo::Brush brush2;
 oppo::Camera camera;
-oppo::Camera cam2;
+oppo::SpriteSheet SH;
+oppo::Sprite sprite;
+oppo::Bitmap bitmap;
 
 oppo::Result gameloop(oppo::Event event) {
 	switch (event.type) {
@@ -30,24 +31,12 @@ oppo::Result gameloop(oppo::Event event) {
 		}
 		else if (event.key == 'S') {
 			camera.position.y += 10;
-		} 
-		else if (event.key == oppo::KEYS::LEFT) {
-			cam2.position.x -= 10;
 		}
-		else if (event.key == oppo::KEYS::RIGHT) {
-			cam2.position.x += 10;
+		else if (event.key == 'Q') {
+			camera.rotation += 10;
 		}
-		else if (event.key == oppo::KEYS::UP) {
-			cam2.position.y -= 10;
-		}
-		else if (event.key == oppo::KEYS::DOWN) {
-			cam2.position.y += 10;
-		}
-		else if (event.key == oppo::KEYS::SPACE) {
-			brush.strokeWidth = 3;
-		}
-		else if (event.key == oppo::KEYS::BACK) {
-			brush.strokeWidth = 1;
+		else if (event.key == 'E') {
+			camera.rotation -= 10;
 		}
 		return 0;
 	case oppo::EVENTS::KEYUP:
@@ -57,8 +46,7 @@ oppo::Result gameloop(oppo::Event event) {
 		std::cout << (char)event.aParam << std::endl;
 		return 0;
 	case oppo::EVENTS::MOUSEMOVE:
-		//std::cout << std::hex << "mouse x: " << event.x << "\t" << "mouse y: " << event.y << std::endl;
-		//std::cout << "mouse x: " << (event.aParam & 0xffffffff) << "\t" << "mouse y: " << ((event.aParam >> 32) & 0xffffffff) << std::endl;
+		//std::cout << "mouse x: " << event.mouse.x << "\t" << "mouse y: " << event.mouse.y << std::endl;
 		return 0;
 	case oppo::EVENTS::MOUSESCROLL:
 		std::cout << "scroll:\t" << event.bParam << "\t" << event.aParam << std::endl;
@@ -79,7 +67,9 @@ oppo::Result gameloop(oppo::Event event) {
 		brush.SetColor(oppo::Color(1., 0., .5));
 		camera.DrawShape(oppo::RectF(100, 100, 160, 140), brush);
 		brush.SetColor(oppo::Color(.2f, .4, 1.4, .2));
-		cam2.FillShape(oppo::Ellipse(oppo::Point2F(120, 130), 30, 20), brush);
+		camera.FillShape(oppo::Ellipse(oppo::Point2F(120, 130), 30, 20), brush);
+		camera.DrawSprite(sprite);
+		//cam2.DrawBitmap(bitmap, oppo::RectF(-50, -50, 50, 50), 1, oppo::RectF(4, 4, 8, 8));
 		return 0;
 	case oppo::EVENTS::UPDATE:
 		return 0;
@@ -104,12 +94,18 @@ int main() {
 		r = wm.CreateCamera(&camera);
 	}
 	if (oppo::Succeeded(r)) {
-		r = wm.CreateCamera(&cam2);
-	}
-	if (oppo::Succeeded(r)) {
 		r = wm.CreateBrush(&brush);
 	}
-
+	if (oppo::Succeeded(r)) {
+		r = wm.CreateSpriteSheet("test spritesheet.png", oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
+	}
+	if (oppo::Succeeded(r)) {
+		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(1,1));
+		sprite.position = oppo::Point2F(50, 50);
+	}
+	if (oppo::Succeeded(r)) {
+		r = wm.CreateBitmap("test spritesheet.png", &bitmap);
+	}
 	if (oppo::Succeeded(r)) {
 		wm.Run();
 	}

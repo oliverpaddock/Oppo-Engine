@@ -155,7 +155,7 @@ namespace oppo::utility {
 			this->left = left;
 			this->top = top;
 			this->right = right;
-			this->left = left;
+			this->bottom = bottom;
 		}
 	};
 

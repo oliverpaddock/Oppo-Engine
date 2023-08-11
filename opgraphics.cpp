@@ -82,22 +82,22 @@ void oppo::Camera::FillShape(Ellipse ellipse, Brush brush) {
 
 void oppo::Camera::DrawShape(Rect rect, Brush brush) {
 	SafePushLayer();
-	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
 }
 
 void oppo::Camera::DrawShape(RectF rect, Brush brush) {
 	SafePushLayer();
-	(*ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
 }
 
 void oppo::Camera::DrawShape(RoundedRect roundedRect, Brush brush) {
 	SafePushLayer();
-	(*ppRT)->DrawRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush);
+	(*ppRT)->DrawRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush, brush.strokeWidth);
 }
 
 void oppo::Camera::DrawShape(Ellipse ellipse, Brush brush) {
 	SafePushLayer();
-	(*ppRT)->DrawEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush);
+	(*ppRT)->DrawEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush, brush.strokeWidth);
 }
 
 void oppo::Camera::DrawShape(Line line, Brush brush) {
@@ -109,12 +109,12 @@ void oppo::Camera::DrawShape(Bezier bezier, Brush brush) {
 	SafePushLayer();
 }
 
-void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f, RectF sourceRect = RectF()) {
+void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect) {
 	SafePushLayer();
 	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, D2D1::RectF(sourceRect.left, sourceRect.top, sourceRect.right, sourceRect.bottom));
 }
 
-void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f) {
+void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity) {
 	SafePushLayer();
 	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR);
 }
@@ -126,6 +126,11 @@ void oppo::Camera::DrawSprite(Sprite sprite) {
 		sprite.position.y + (sprite.rect.top - sprite.position.y) * sprite.scale.height,
 		sprite.position.x + (sprite.rect.right - sprite.position.x) * sprite.scale.width,
 		sprite.position.y + (sprite.rect.bottom - sprite.position.y) * sprite.scale.height);
+
+	D2D1_RECT_F rc = sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex);
+
+	//std::cout << drawRect.left << "\t" << drawRect.top << "\t" << drawRect.right << "\t" << drawRect.bottom << std::endl;
+	std::cout << rc.left << "\t" << rc.top << "\t" << rc.right << "\t" << rc.bottom << std::endl;
 	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, drawRect, sprite.opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
 }
 
@@ -154,7 +159,8 @@ void oppo::Camera::SafePushLayer() {
 	}
 	(*ppRT)->PushLayer(layerParams, pLayer);
 	*ppCurrentLayer = pLayer;
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Translation(-position.x, -position.y));
+	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y))*D2D1::Matrix3x2F::Translation(-position.x + sz.width/2, -position.y + sz.height/2));
 }
 #pragma endregion
 

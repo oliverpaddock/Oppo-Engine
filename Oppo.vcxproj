@@ -138,6 +138,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="opgraphics.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="test spritesheet.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
