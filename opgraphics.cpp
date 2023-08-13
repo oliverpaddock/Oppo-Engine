@@ -128,9 +128,6 @@ void oppo::Camera::DrawSprite(Sprite sprite) {
 		sprite.position.y + (sprite.rect.bottom - sprite.position.y) * sprite.scale.height);
 
 	D2D1_RECT_F rc = sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex);
-
-	//std::cout << drawRect.left << "\t" << drawRect.top << "\t" << drawRect.right << "\t" << drawRect.bottom << std::endl;
-	std::cout << rc.left << "\t" << rc.top << "\t" << rc.right << "\t" << rc.bottom << std::endl;
 	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, drawRect, sprite.opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
 }
 
@@ -472,7 +469,7 @@ oppo::Result oppo::WindowManager::Init(WindowPackage wp) {
 		utility::StringToWString(wp.windowName).c_str(),
 		WS_OVERLAPPEDWINDOW,
 		// Size and position: X, Y, Width, Height
-		wp.szScreen.width, wp.szScreen.height, CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT, wp.szScreen.width, wp.szScreen.height,
 		NULL,       // Parent window    
 		NULL,       // Menu
 		GetModuleHandle(NULL),  // Instance handle
@@ -766,6 +763,22 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 		InvalidateRect(hWnd, NULL, FALSE);
 		return 0;
 	}
+	case WM_SIZING: {
+		if (aspectRatio != 0) {
+			RECT* rc;
+			rc = (RECT*)lParam;
+			if (wParam != WMSZ_LEFT && wParam != WMSZ_TOPLEFT && wParam != WMSZ_BOTTOMLEFT && wParam != WMSZ_RIGHT) {
+				rc->right = (rc->bottom - rc->top) * aspectRatio + rc->left;
+			}
+			else if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT) {
+				rc->bottom = (rc->right - rc->left) * 1 / aspectRatio + rc->top;
+			}
+			else {
+				rc->left = rc->right - (rc->bottom - rc->top) * aspectRatio;
+			}
+		}
+		return TRUE;
+	}
 	case WM_GETMINMAXINFO: { 
 		LPMINMAXINFO lpMMI = (LPMINMAXINFO)(lParam);
 		if (szMin.width) {
@@ -919,6 +932,7 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 	case WM_MOUSEWHEEL: {
 		if (GameLoop) {
 			e.type = EVENTS::MOUSESCROLL;
+			e.mouseWheel.y = GET_WHEEL_DELTA_WPARAM(wParam);
 			e.mouse.x = GET_X_LPARAM(lParam);
 			e.mouse.y = GET_Y_LPARAM(lParam);
 			e.flags.vScroll = 1;
@@ -932,6 +946,7 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 	case WM_MOUSEHWHEEL: {
 		if (GameLoop) {
 			e.type = EVENTS::MOUSESCROLL;
+			e.mouseWheel.x = GET_WHEEL_DELTA_WPARAM(wParam);
 			e.mouse.x = GET_X_LPARAM(lParam);
 			e.mouse.y = GET_Y_LPARAM(lParam);
 			e.flags.hScroll = 1;

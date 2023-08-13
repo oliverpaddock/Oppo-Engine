@@ -297,6 +297,10 @@ namespace oppo {
 			double dt; // used for timer events
 			long long key; // oppo::KEYS key
 			char character; // key characters
+			struct {
+				long x; // horizontal mousewheel
+				long y; // vertical mousewheel
+			} mouseWheel;
 		};
 
 		union {
