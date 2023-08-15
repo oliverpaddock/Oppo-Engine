@@ -85,7 +85,8 @@ int main() {
 	wp.szMax = oppo::Size2D(0, 0);
 	wp.szScreen = oppo::Size2D(600, 300);
 	wp.aspectRatio = 2;
-	wp.ups = 500;
+	wp.ups = 100;
+	wp.aps = 1;
 	wm.RegisterGameLoop(gameloop);
 	oppo::Result r = wm.Init(wp);
 

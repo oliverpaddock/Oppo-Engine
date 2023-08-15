@@ -11,12 +11,14 @@
 #include <codecvt>
 #include <thread>
 #include <random>
+#include <map>
 
 #include "optypes.h"
 #include "timer.h"
 
 #define OP_DEFAULTFPS 60
 #define OP_DEFAULTUPS 100
+#define OP_DEFAULTAPS 30
 #define WM_FRAME WM_USER + 1
 
 namespace oppo::utility {
@@ -46,12 +48,13 @@ namespace oppo {
 	* TileMap
 	*/
 	struct WindowPackage {
-		Size2D szScreen; // Screen size on startup, 0 for default
-		Size2D szMin; // Minimum screen size, 0 for no min
-		Size2D szMax; // Maximum screen size, 0 for no max
+		Size2D szScreen = Size2D(); // Screen size on startup, 0 for default
+		Size2D szMin = Size2D(); // Minimum screen size, 0 for no min
+		Size2D szMax = Size2D(); // Maximum screen size, 0 for no max
 		float aspectRatio = 0; // fixed aspect ratio, 0 for unfixed
 		float fps = OP_DEFAULTFPS; // Frames per second
 		float ups = OP_DEFAULTUPS; // Updates per second
+		float aps = OP_DEFAULTAPS; // Animations per second
 		Color backgroundColor = Color(); // Default background color
 		const char* windowName = ""; // Window name
 		int windowID = 0; // sent with events to tell multiple windows apart
@@ -183,16 +186,27 @@ namespace oppo {
 		friend class WindowManager;
 	};
 
+	class Animation {
+		
+	};
+
+	class AnimationManager {
+	public:
+
+	private:
+
+	};
+
 	class ResourceManager {
 		/*TODO:
 		* CreateTextLayout()
 		* CreateTileMap()
 		*/
 	public:
-		void Init(WindowManager*, HWND);
-		HRESULT CreateWindowResources();
+		void Init(WindowManager*);
+		HRESULT CreateWindowResources(HWND);
 		void DestroyWindowResources();
-		HRESULT RecreateDDResources();
+		HRESULT RecreateDDResources(HWND);
 
 		HRESULT CreateBrush(Brush*, Color); // brush
 		HRESULT CreateBitmap(const char*, Bitmap*); // filename, bitmap
@@ -207,7 +221,6 @@ namespace oppo {
 		void DestroyCamera(Camera*);
 
 	private:
-		HWND hWnd;
 		ID2D1HwndRenderTarget* pRT;
 		ID2D1Factory* pFactory;
 		IWICImagingFactory* pFactoryWIC;
@@ -222,7 +235,7 @@ namespace oppo {
 		std::vector<Camera*> cameras;
 		
 		HRESULT CreateDIResources();
-		HRESULT CreateDDResources();
+		HRESULT CreateDDResources(HWND);
 		void DestroyDIResources();
 		void DestroyDDResources();
 		HRESULT LoadBitmapFromFile(const char*, ID2D1Bitmap**);
@@ -232,9 +245,10 @@ namespace oppo {
 	public:
 		Result Init(WindowPackage);
 		Result Run();
-		void RegisterGameLoop(Result(*)(Event));
+		void RegisterGameLoop(Result(*Func)(Event));
 		void SetFPS(float);
 		void SetUPS(float);
+		void SetAPS(float);
 
 		Result CreateBrush(Brush*); // brush
 		Result CreateBitmap(const char*, Bitmap*); // filename, bitmap
@@ -268,8 +282,10 @@ namespace oppo {
 
 		Stopwatch<std::chrono::microseconds> swRender; // controls framerate
 		Stopwatch<std::chrono::microseconds> swUpdate; // controls update messages
+		Stopwatch<std::chrono::microseconds> swAnimate; // controls animation frames
 		unsigned long long renderCountTarget = -1;
 		unsigned long long updateCountTarget = -1;
+		unsigned long long animateCountTarget = -1;
 		std::thread tGameLoopTimer;
 
 		enum class WNDSTATE {

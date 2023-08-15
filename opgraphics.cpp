@@ -162,16 +162,15 @@ void oppo::Camera::SafePushLayer() {
 #pragma endregion
 
 #pragma region Resource Manager
-void oppo::ResourceManager::Init(WindowManager* wm, HWND hWnd) {
-	this->hWnd = hWnd;
+void oppo::ResourceManager::Init(WindowManager* wm) {
 	wm->ppRT = &pRT;
 	wm->ppCurrentLayer = &currentLayer;
 }
 
-HRESULT oppo::ResourceManager::CreateWindowResources() {
+HRESULT oppo::ResourceManager::CreateWindowResources(HWND hWnd) {
 	HRESULT hr = CreateDIResources();
 	if (SUCCEEDED(hr)) {
-		hr = CreateDDResources();
+		hr = CreateDDResources(hWnd);
 	}
 	return hr;
 }
@@ -203,7 +202,7 @@ HRESULT oppo::ResourceManager::CreateDIResources() {
 	return hr;
 }
 
-HRESULT oppo::ResourceManager::CreateDDResources() {
+HRESULT oppo::ResourceManager::CreateDDResources(HWND hWnd) {
 	RECT rc;
 	GetClientRect(hWnd, &rc);
 	HRESULT hr = pFactory->CreateHwndRenderTarget(
@@ -219,8 +218,8 @@ HRESULT oppo::ResourceManager::CreateDDResources() {
 	return hr;
 }
 
-HRESULT oppo::ResourceManager::RecreateDDResources() {
-	HRESULT hr = CreateDDResources();
+HRESULT oppo::ResourceManager::RecreateDDResources(HWND hWnd) {
+	HRESULT hr = CreateDDResources(hWnd);
 
 	if (SUCCEEDED(hr)) {
 		for (auto pBrush : brushes) {
@@ -486,6 +485,7 @@ oppo::Result oppo::WindowManager::Init(WindowPackage wp) {
 	aspectRatio = wp.aspectRatio;
 	SetFPS(wp.fps);
 	SetUPS(wp.ups);
+	SetAPS(wp.aps);
 	winID = wp.windowID;
 
 	tGameLoopTimer = std::thread([this]() { GameLoopTimer(); });
@@ -528,6 +528,15 @@ void oppo::WindowManager::SetUPS(float ups) {
 	}
 	else {
 		updateCountTarget = (int)(1000000 / ups); // game loop timers are in microseconds
+	}
+}
+
+void oppo::WindowManager::SetAPS(float aps) {
+	if (aps == 0) {
+		animateCountTarget = -1; // avoid divide by zero error
+	}
+	else {
+		animateCountTarget = (int)(1000000 / aps); // game loop timers are in microseconds
 	}
 }
 
@@ -596,14 +605,19 @@ void oppo::WindowManager::NewClassName() {
 void oppo::WindowManager::GameLoopTimer() {
 	long long renderCount;
 	long long updateCount;
+	long long animateCount;
 	swRender.Reset();
 	swUpdate.Reset();
+	swAnimate.Reset();
+
 	while (wndState != WNDSTATE::DESTROY) {
 		renderCount = swRender.Elapsed().count();
 		updateCount = swUpdate.Elapsed().count();
-		if (updateCount >= updateCountTarget && wndState == WNDSTATE::RUN) {
-			swUpdate.Reset();
-			PostMessage(hWnd, WM_FRAME, updateCount, 0);
+		animateCount = swAnimate.Elapsed().count();
+
+		if (animateCount >= animateCountTarget && wndState == WNDSTATE::RUN) {
+			swAnimate.Reset();
+			PostMessage(hWnd, WM_FRAME, animateCount, 2);
 		}
 
 		if (renderCount >= renderCountTarget && wndState == WNDSTATE::RUN) {
@@ -611,6 +625,12 @@ void oppo::WindowManager::GameLoopTimer() {
 			PostMessage(hWnd, WM_FRAME, renderCount, 1);
 			InvalidateRect(hWnd, NULL, FALSE);
 		}
+
+		if (updateCount >= updateCountTarget && wndState == WNDSTATE::RUN) {
+			swUpdate.Reset();
+			PostMessage(hWnd, WM_FRAME, updateCount, 0);
+		}
+
 	}
 }
 
@@ -724,8 +744,8 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 	e.windowID = winID;
 	switch (uMsg) {
 	case WM_CREATE: { 
-		resourceManager.Init(this, hWnd);
-		if (FAILED(resourceManager.CreateWindowResources())) {
+		resourceManager.Init(this);
+		if (FAILED(resourceManager.CreateWindowResources(hWnd))) {
 			return -1;
 		}
 		if (GameLoop) {
@@ -818,7 +838,7 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 		HRESULT hr = (*ppRT)->EndDraw();
 
 		if (hr == D2DERR_RECREATE_TARGET) {
-			resourceManager.RecreateDDResources();
+			resourceManager.RecreateDDResources(hWnd);
 			InvalidateRect(hWnd, NULL, FALSE);
 		}
 
@@ -836,6 +856,9 @@ LRESULT CALLBACK oppo::WindowManager::WindowProc(HWND hWnd, UINT uMsg, WPARAM wP
 			else if (lParam == 1) {
 				// render
 				InvalidateRect(hWnd, NULL, FALSE);
+			}
+			else if (lParam == 2) {
+				// animate
 			}
 		}
 
