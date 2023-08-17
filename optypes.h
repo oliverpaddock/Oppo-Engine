@@ -208,7 +208,8 @@ namespace oppo {
 	using Result = long;
 	enum ERRORS : Result {
 		SUCCESS = 0,
-		FAIL    = -1
+		FAIL    = -1,
+		WARNING = 1 // warning is a success, but might indicate unexpected behavior
 	};
 	inline bool Succeeded(Result r) { return r >= 0; }
 	inline bool Failed(Result r) { return r < 0; }

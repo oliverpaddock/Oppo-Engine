@@ -1,5 +1,6 @@
 #include "opgraphics.h"
 #include <iostream>
+#pragma region Utility
 std::wstring oppo::utility::StringToWString(const std::string& str)
 {
 	int count = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), NULL, 0);
@@ -7,6 +8,7 @@ std::wstring oppo::utility::StringToWString(const std::string& str)
 	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), &wstr[0], count);
 	return wstr;
 }
+#pragma endregion
 
 #pragma region Brush
 void oppo::Brush::SetColor(Color color) {
@@ -161,6 +163,162 @@ void oppo::Camera::SafePushLayer() {
 }
 #pragma endregion
 
+#pragma region Animation
+void oppo::Animation::NewFrames(int n) {
+	frames.clear();
+	frames.resize(n);
+}
+void oppo::Animation::AddFrames(int n) {
+	frames.resize(frames.size() + n);
+}
+
+oppo::Result oppo::Animation::FrameFromVector(std::vector<AnimationFrame> frames) {
+	Result r = ERRORS::SUCCESS;
+	if (this->frames.size() != 0) {
+		r = ERRORS::WARNING; // frame override
+	}
+	this->frames = frames;
+	return r;
+}
+oppo::Result oppo::Animation::IndexFromVector(std::vector<Size2D> indexFrames) {
+	Result r = ERRORS::SUCCESS;
+	if (indexFrames.size() != frames.size()) {
+		r = ERRORS::WARNING; // frame size mismatch
+	}
+	if (frames.size() < indexFrames.size()) {
+		AddFrames(indexFrames.size() - frames.size());
+	}
+	for (int i = 0; i < indexFrames.size(); i++) {
+		frames[i].spriteIndex = indexFrames[i];
+	}
+	return r;
+}
+oppo::Result oppo::Animation::PosFromVector(std::vector<Vector2F> posFrames) {
+	Result r = ERRORS::SUCCESS;
+	if (posFrames.size() != frames.size()) {
+		r = ERRORS::WARNING; // frame size mismatch
+	}
+	if (frames.size() < posFrames.size()) {
+		AddFrames(posFrames.size() - frames.size());
+	}
+	for (int i = 0; i < posFrames.size(); i++) {
+		frames[i].dPosition = posFrames[i];
+	}
+	return r;
+}
+oppo::Result oppo::Animation::RotFromVector(std::vector<float> rotFrames) {
+	Result r = ERRORS::SUCCESS;
+	if (rotFrames.size() != frames.size()) {
+		r = ERRORS::WARNING; // frame size mismatch
+	}
+	if (frames.size() < rotFrames.size()) {
+		AddFrames(rotFrames.size() - frames.size());
+	}
+	for (int i = 0; i < rotFrames.size(); i++) {
+		frames[i].dRot = rotFrames[i];
+	}
+	return r;
+}
+oppo::Result oppo::Animation::ScaleFromVector(std::vector<Size2F> scaleFrames) {
+	Result r = ERRORS::SUCCESS;
+	if (scaleFrames.size() != frames.size()) {
+		r = ERRORS::WARNING; // frame size mismatch
+	}
+	if (frames.size() < scaleFrames.size()) {
+		AddFrames(scaleFrames.size() - frames.size());
+	}
+	for (int i = 0; i < scaleFrames.size(); i++) {
+		frames[i].dScale = scaleFrames[i];
+	}
+	return r;
+}
+
+oppo::Result oppo::Animation::IndexConstValue(Size2D index) {
+	if (frames.size() < 1) {
+		return ERRORS::FAIL;
+	}
+	for (int i = 0; i < frames.size(); i++) {
+		frames[i].spriteIndex = index;
+	}
+	return ERRORS::SUCCESS;
+}
+oppo::Result oppo::Animation::PosConstValue(Vector2F position) {
+	if (frames.size() < 1) {
+		return ERRORS::FAIL;
+	}
+	for (int i = 0; i < frames.size(); i++) {
+		frames[i].dPosition = position;
+	}
+	return ERRORS::SUCCESS;
+}
+oppo::Result oppo::Animation::RotConstValue(float rotation) {
+	if (frames.size() < 1) {
+		return ERRORS::FAIL;
+	}
+	for (int i = 0; i < frames.size(); i++) {
+		frames[i].dRot = rotation;
+	}
+	return ERRORS::SUCCESS;
+}
+oppo::Result oppo::Animation::ScaleConstValue(Size2F scale) {
+	if (frames.size() < 1) {
+		return ERRORS::FAIL;
+	}
+	for (int i = 0; i < frames.size(); i++) {
+		frames[i].dScale = scale;
+	}
+	return ERRORS::SUCCESS;
+}
+
+oppo::Result oppo::Animation::IndexLinValue(Size2D index1, Size2D index2) {
+	if (frames.size() < 2) {
+		return ERRORS::FAIL;
+	}
+	std::vector<Size2D> newFrameValues;
+	float stepWidth = (index2.width - index1.width) / static_cast<float>(frames.size() - 1);
+	float stepHeight = (index2.height - index1.height) / static_cast<float>(frames.size() - 1);
+	for (int i = 0; i < frames.size(); i++) {
+		newFrameValues.push_back(Size2D(index1.width + i * stepWidth, index1.height + i * stepHeight));
+	}
+	return IndexFromVector(newFrameValues);
+}
+oppo::Result oppo::Animation::PosLinValue(Vector2F pos1, Vector2F pos2) {
+	if (frames.size() < 2) {
+		return ERRORS::FAIL;
+	}
+	std::vector<Vector2F> newFrameValues;
+	float stepX = (pos2.x - pos1.x) / static_cast<float>(frames.size() - 1);
+	float stepY = (pos2.y - pos1.y) / static_cast<float>(frames.size() - 1);
+	for (int i = 0; i < frames.size(); i++) {
+		newFrameValues.push_back(Vector2F(pos1.x + i * stepX, pos1.y + i * stepY));
+	}
+	return PosFromVector(newFrameValues);
+}
+oppo::Result oppo::Animation::RotLinValue(float rot1, float rot2) {
+	if (frames.size() < 2) {
+		return ERRORS::FAIL;
+	}
+	std::vector<float> newFrameValues;
+	float step = (rot2 - rot1) / static_cast<float>(frames.size() - 1);
+	for (int i = 0; i < frames.size(); i++) {
+		newFrameValues.push_back(rot1 + i * step);
+	}
+	return RotFromVector(newFrameValues);
+}
+oppo::Result oppo::Animation::ScaleLinValue(Size2F scale1, Size2F scale2) {
+	if (frames.size() < 2) {
+		return ERRORS::FAIL;
+	}
+	std::vector<Size2F> newFrameValues;
+	float stepWidth = (scale2.width - scale1.width) / static_cast<float>(frames.size() - 1);
+	float stepHeight = (scale2.height - scale1.height) / static_cast<float>(frames.size() - 1);
+	for (int i = 0; i < frames.size(); i++) {
+		newFrameValues.push_back(Size2F(scale1.width + i * stepWidth, scale1.height + i * stepHeight));
+	}
+	return ScaleFromVector(newFrameValues);
+}
+#pragma endregion
+
 #pragma region Resource Manager
 void oppo::ResourceManager::Init(WindowManager* wm) {
 	wm->ppRT = &pRT;
@@ -174,7 +332,6 @@ HRESULT oppo::ResourceManager::CreateWindowResources(HWND hWnd) {
 	}
 	return hr;
 }
-
 void oppo::ResourceManager::DestroyWindowResources() {
 	DestroyDDResources();
 	DestroyDIResources();
@@ -201,7 +358,6 @@ HRESULT oppo::ResourceManager::CreateDIResources() {
 
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::CreateDDResources(HWND hWnd) {
 	RECT rc;
 	GetClientRect(hWnd, &rc);
@@ -217,7 +373,6 @@ HRESULT oppo::ResourceManager::CreateDDResources(HWND hWnd) {
 	);
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::RecreateDDResources(HWND hWnd) {
 	HRESULT hr = CreateDDResources(hWnd);
 
@@ -243,7 +398,6 @@ void oppo::ResourceManager::DestroyDIResources() {
 	utility::SafeRelease(&pFactory);
 	utility::SafeRelease(&pFactoryWIC);
 }
-
 void oppo::ResourceManager::DestroyDDResources() {
 	for (auto pBrush : brushes) {
 		DestroyBrush(pBrush);
@@ -272,7 +426,6 @@ HRESULT oppo::ResourceManager::CreateBrush(Brush* pBrush, Color color = Color())
 
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::CreateBitmap(const char* fileName, Bitmap* pBitmap) {
 	HRESULT hr = S_OK;
 
@@ -288,7 +441,6 @@ HRESULT oppo::ResourceManager::CreateBitmap(const char* fileName, Bitmap* pBitma
 
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
 	HRESULT hr = E_FAIL;
 	if (pRT) {
@@ -307,7 +459,6 @@ HRESULT oppo::ResourceManager::CreateSpriteSheet(const char* fileName, Size2D sp
 
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()) {
 	HRESULT hr = E_FAIL;
 
@@ -323,7 +474,6 @@ HRESULT oppo::ResourceManager::CreateSprite(Sprite* pSprite, SpriteSheet* pSprit
 
 	return hr;
 }
-
 HRESULT oppo::ResourceManager::CreateCamera(Camera* pCamera) {
 	HRESULT hr = E_FAIL;
 	
@@ -346,13 +496,11 @@ void oppo::ResourceManager::DestroyBrush(Brush* pBrush) {
 	utility::SafeRelease(&pBrush->pBrush);
 	utility::DeleteFromVector(brushes, pBrush);
 }
-
 void oppo::ResourceManager::DestroyBitmap(Bitmap* pBitmap) {
 	utility::SafeRelease(&pBitmap->pBitmap);
 	pBitmap->fileName = "";
 	utility::DeleteFromVector(bitmaps, pBitmap);
 }
-
 void oppo::ResourceManager::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
 	utility::SafeRelease(&pSpriteSheet->pBitmap);
 	pSpriteSheet->fileName = "";
@@ -362,7 +510,6 @@ void oppo::ResourceManager::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
 	pSpriteSheet->padding = Rect();
 	utility::DeleteFromVector(spriteSheets, pSpriteSheet);
 }
-
 void oppo::ResourceManager::DestroySprite(Sprite* pSprite) {
 	pSprite->pSpriteSheet = nullptr;
 	pSprite->rect = RectF();
@@ -371,7 +518,6 @@ void oppo::ResourceManager::DestroySprite(Sprite* pSprite) {
 	pSprite->scale = Size2F(1, 1);
 	pSprite->spriteIndex = Size2D();
 }
-
 void oppo::ResourceManager::DestroyCamera(Camera* pCamera) {
 	utility::SafeRelease(&pCamera->pLayer);
 	pCamera->ppCurrentLayer = nullptr;
@@ -492,7 +638,6 @@ oppo::Result oppo::WindowManager::Init(WindowPackage wp) {
 
 	return ERRORS::SUCCESS;
 }
-
 oppo::Result oppo::WindowManager::Run() {
 	if (hWnd == NULL) {
 		return ERRORS::FAIL;
@@ -508,7 +653,6 @@ oppo::Result oppo::WindowManager::Run() {
 	tGameLoopTimer.join();
 	return ERRORS::SUCCESS;
 }
-
 void oppo::WindowManager::RegisterGameLoop(Result(*Func)(Event)) {
 	GameLoop = Func;
 }
@@ -521,7 +665,6 @@ void oppo::WindowManager::SetFPS(float fps) {
 		renderCountTarget = (int)(1000000 / fps); // game loop timers are in microseconds
 	}
 }
-
 void oppo::WindowManager::SetUPS(float ups) {
 	if (ups == 0) {
 		updateCountTarget = -1; // avoid divide by zero error
@@ -530,7 +673,6 @@ void oppo::WindowManager::SetUPS(float ups) {
 		updateCountTarget = (int)(1000000 / ups); // game loop timers are in microseconds
 	}
 }
-
 void oppo::WindowManager::SetAPS(float aps) {
 	if (aps == 0) {
 		animateCountTarget = -1; // avoid divide by zero error
@@ -545,25 +687,21 @@ oppo::Result oppo::WindowManager::CreateBrush(Brush* pBrush) {
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
-
 oppo::Result oppo::WindowManager::CreateBitmap(const char* fileName, Bitmap* pBitmap) {
 	HRESULT hr = resourceManager.CreateBitmap(fileName, pBitmap);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
-
 oppo::Result oppo::WindowManager::CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
 	HRESULT hr = resourceManager.CreateSpriteSheet(fileName, spriteSize, spriteCount, padding, pSpriteSheet);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
-
 oppo::Result oppo::WindowManager::CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()) {
 	HRESULT hr = resourceManager.CreateSprite(pSprite, pSpriteSheet, spriteRect, spriteIndex);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
-
 oppo::Result oppo::WindowManager::CreateCamera(Camera* pCamera) {
 	HRESULT hr = resourceManager.CreateCamera(pCamera);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
@@ -573,23 +711,18 @@ oppo::Result oppo::WindowManager::CreateCamera(Camera* pCamera) {
 void oppo::WindowManager::DestroyBrush(Brush* pBrush) {
 	resourceManager.DestroyBrush(pBrush);
 }
-
 void oppo::WindowManager::DestroyBitmap(Bitmap* pBitmap) {
 	resourceManager.DestroyBitmap(pBitmap);
 }
-
 void oppo::WindowManager::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
 	resourceManager.DestroySpriteSheet(pSpriteSheet);
 }
-
 void oppo::WindowManager::DestroySprite(Sprite* pSprite) {
 	resourceManager.DestroySprite(pSprite);
 }
-
 void oppo::WindowManager::DestroyCamera(Camera* pCamera) {
 	resourceManager.DestroyCamera(pCamera);
 }
-
 void oppo::WindowManager::NewClassName() {
 	std::mt19937 rng(static_cast<unsigned int>(std::time(nullptr)));
 	std::uniform_int_distribution<int> distribution(0x0041, 0x007A);
@@ -601,7 +734,6 @@ void oppo::WindowManager::NewClassName() {
 	}
 	className[16] = L'\0';
 }
-
 void oppo::WindowManager::GameLoopTimer() {
 	long long renderCount;
 	long long updateCount;

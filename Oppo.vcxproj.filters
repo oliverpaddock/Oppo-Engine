@@ -13,25 +13,22 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\new">
-      <UniqueIdentifier>{f77b98e5-1b16-4a2c-9019-34c523ea1df5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\example">
       <UniqueIdentifier>{fe7a877c-4d5a-432a-b97f-6299c8e6e312}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="optypes.h">
-      <Filter>Header Files\new</Filter>
-    </ClInclude>
     <ClInclude Include="opgraphics.h">
-      <Filter>Header Files\new</Filter>
-    </ClInclude>
-    <ClInclude Include="timer.h">
-      <Filter>Header Files\new</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="oppo.h">
-      <Filter>Header Files\new</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="optypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

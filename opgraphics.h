@@ -60,17 +60,6 @@ namespace oppo {
 		int windowID = 0; // sent with events to tell multiple windows apart
 	};
 
-	class ResourceManager;
-	class WindowManager;
-
-	class Brush;
-	class Bitmap;
-	class Spritesheet;
-	class Sprite;
-	class TextLayout;
-	class TileMap;
-	class Camera;
-
 	class Brush {
 	public:
 		void SetColor(Color);
@@ -185,17 +174,40 @@ namespace oppo {
 		friend class ResourceManager;
 		friend class WindowManager;
 	};
+	
+	struct AnimationFrame {
+		Size2D spriteIndex = Size2D(); // sprite to display
+		Vector2F dPosition = Vector2F(); // change in position
+		float dRot = 0; // change in rotation
+		Size2F dScale = Size2F(); // change in scale, {0, 0} for no change
+	};
 
 	class Animation {
-		
-	};
-
-	class AnimationManager {
 	public:
+		std::vector<AnimationFrame> frames;
+		int repeatCount = 1; // repeatCount < 0 = infinite loop
 
-	private:
+		void NewFrames(int); // create empty frames
+		void AddFrames(int);
 
+		Result FrameFromVector(std::vector<AnimationFrame>);
+		Result IndexFromVector(std::vector<Size2D>);
+		Result PosFromVector(std::vector<Vector2F>);
+		Result RotFromVector(std::vector<float>);
+		Result ScaleFromVector(std::vector<Size2F>);
+
+		Result IndexConstValue(Size2D);
+		Result PosConstValue(Vector2F);
+		Result RotConstValue(float);
+		Result ScaleConstValue(Size2F);
+
+		Result IndexLinValue(Size2D, Size2D);
+		Result PosLinValue(Vector2F, Vector2F);
+		Result RotLinValue(float, float);
+		Result ScaleLinValue(Size2F, Size2F);
 	};
+
+	class AnimationManager {};
 
 	class ResourceManager {
 		/*TODO:
