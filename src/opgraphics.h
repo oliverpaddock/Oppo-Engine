@@ -76,7 +76,9 @@ namespace oppo {
 	class Bitmap {
 	protected:
 		std::string fileName;
+		PCWSTR resource;
 		ID2D1Bitmap* pBitmap;
+		bool fromResource = false;
 
 		friend class Camera;
 		friend class ResourceManager;
@@ -222,7 +224,9 @@ namespace oppo {
 
 		HRESULT CreateBrush(Brush*, Color); // brush
 		HRESULT CreateBitmap(const char*, Bitmap*); // filename, bitmap
+		HRESULT CreateBitmapFromResource(PCWSTR, Bitmap*);
 		HRESULT CreateSpriteSheet(const char*, Size2D, Size2D, Rect, SpriteSheet*); // filename, sprite size, sprite count, padding
+		HRESULT CreateSpriteSheetFromResource(PCWSTR, Size2D, Size2D, Rect, SpriteSheet*);
 		HRESULT CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
 		HRESULT CreateCamera(Camera*);
 
@@ -231,6 +235,10 @@ namespace oppo {
 		void DestroySpriteSheet(SpriteSheet*);
 		void DestroySprite(Sprite*);
 		void DestroyCamera(Camera*);
+
+		~ResourceManager() {
+			DestroyWindowResources();
+		}
 
 	private:
 		ID2D1HwndRenderTarget* pRT;
@@ -251,6 +259,7 @@ namespace oppo {
 		void DestroyDIResources();
 		void DestroyDDResources();
 		HRESULT LoadBitmapFromFile(const char*, ID2D1Bitmap**);
+		HRESULT LoadBitmapFromResource(PCWSTR hResource, ID2D1Bitmap** pBitmap);
 	};
 
 	class WindowManager {
@@ -264,7 +273,9 @@ namespace oppo {
 
 		Result CreateBrush(Brush*); // brush
 		Result CreateBitmap(const char*, Bitmap*); // filename, bitmap
+		Result CreateBitmapFromResource(PCWSTR, Bitmap*);
 		Result CreateSpriteSheet(const char*, Size2D, Size2D, Rect, SpriteSheet*); // filename, sprite size, sprite count, padding
+		Result CreateSpriteSheetFromResource(PCWSTR, Size2D, Size2D, Rect, SpriteSheet*);
 		Result CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
 		Result CreateCamera(Camera*);
 

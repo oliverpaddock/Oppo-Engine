@@ -1,4 +1,5 @@
 #include "oppo.h"
+#include "resource.h"
 #include <iostream>
 
 oppo::Brush brush;
@@ -98,12 +99,14 @@ int main() {
 	}
 	if (oppo::Succeeded(r)) {
 		r = wm.CreateSpriteSheet("test spritesheet.png", oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
+		//r = wm.CreateSpriteSheetFromResource(MAKEINTRESOURCE(IDB_PNG1), oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
 	}
 	if (oppo::Succeeded(r)) {
 		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(1,1));
 		sprite.position = oppo::Point2F(50, 50);
 	}
 	if (oppo::Succeeded(r)) {
+		//r = wm.CreateBitmapFromResource(MAKEINTRESOURCE(IDB_PNG1), &bitmap);
 		r = wm.CreateBitmap("test spritesheet.png", &bitmap);
 	}
 	if (oppo::Succeeded(r)) {

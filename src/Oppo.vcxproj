@@ -132,6 +132,7 @@
     <ClInclude Include="opgraphics.h" />
     <ClInclude Include="oppo.h" />
     <ClInclude Include="optypes.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="test spritesheet.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Oppo.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

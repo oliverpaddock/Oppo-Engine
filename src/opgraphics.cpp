@@ -381,10 +381,24 @@ HRESULT oppo::ResourceManager::RecreateDDResources(HWND hWnd) {
 			if (SUCCEEDED(hr)) { hr = CreateBrush(pBrush, pBrush->color); }
 		}
 		for (auto pBitmap : bitmaps) {
-			if (SUCCEEDED(hr)) { hr = CreateBitmap(pBitmap->fileName.c_str(), pBitmap); }
+			if (SUCCEEDED(hr)) { 
+				if (pBitmap->fromResource) {
+					hr = CreateBitmapFromResource(pBitmap->resource, pBitmap);
+				}
+				else {
+					hr = CreateBitmap(pBitmap->fileName.c_str(), pBitmap); 
+				}
+			}
 		}
 		for (auto pSpriteSheet : spriteSheets) {
-			if (SUCCEEDED(hr)) { hr = CreateSpriteSheet(pSpriteSheet->fileName.c_str(), pSpriteSheet->pxSpriteResolution, pSpriteSheet->spriteCount, pSpriteSheet->padding, pSpriteSheet); }
+			if (SUCCEEDED(hr)) { 
+				if (pSpriteSheet->fromResource) {
+					hr = CreateSpriteSheetFromResource(pSpriteSheet->resource, pSpriteSheet->pxSpriteResolution, pSpriteSheet->spriteCount, pSpriteSheet->padding, pSpriteSheet);
+				}
+				else {
+					hr = CreateSpriteSheet(pSpriteSheet->fileName.c_str(), pSpriteSheet->pxSpriteResolution, pSpriteSheet->spriteCount, pSpriteSheet->padding, pSpriteSheet); 
+				}
+			}
 		}
 		for (auto pCamera : cameras) {
 			if (SUCCEEDED(hr)) { hr = CreateCamera(pCamera); }
@@ -441,6 +455,22 @@ HRESULT oppo::ResourceManager::CreateBitmap(const char* fileName, Bitmap* pBitma
 
 	return hr;
 }
+HRESULT oppo::ResourceManager::CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap) {
+	HRESULT hr = S_OK;
+
+	if (pRT) {
+		hr = LoadBitmapFromResource(resource, &pBitmap->pBitmap);
+		if (SUCCEEDED(hr)) {
+			pBitmap->fromResource = true;
+			pBitmap->resource = resource;
+			if (std::find(bitmaps.begin(), bitmaps.end(), pBitmap) == bitmaps.end()) {
+				bitmaps.push_back(pBitmap);
+			}
+		}
+	}
+
+	return hr;
+}
 HRESULT oppo::ResourceManager::CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
 	HRESULT hr = E_FAIL;
 	if (pRT) {
@@ -448,6 +478,27 @@ HRESULT oppo::ResourceManager::CreateSpriteSheet(const char* fileName, Size2D sp
 	}
 
 	if (SUCCEEDED(hr)) {
+		pSpriteSheet->fileName = fileName;
+		pSpriteSheet->pxSheetResolution = pSpriteSheet->pBitmap->GetSize();
+		pSpriteSheet->pxSpriteResolution = spriteSize;
+		pSpriteSheet->spriteCount = spriteCount;
+		pSpriteSheet->padding = padding;
+		if (std::find(spriteSheets.begin(), spriteSheets.end(), pSpriteSheet) == spriteSheets.end()) {
+			spriteSheets.push_back(pSpriteSheet);
+		}
+	}
+
+	return hr;
+}
+HRESULT oppo::ResourceManager::CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
+	HRESULT hr = E_FAIL;
+	if (pRT) {
+		hr = LoadBitmapFromResource(resource, &pSpriteSheet->pBitmap);
+	}
+
+	if (SUCCEEDED(hr)) {
+		pSpriteSheet->fromResource = true;
+		pSpriteSheet->resource = resource;
 		pSpriteSheet->pxSheetResolution = pSpriteSheet->pBitmap->GetSize();
 		pSpriteSheet->pxSpriteResolution = spriteSize;
 		pSpriteSheet->spriteCount = spriteCount;
@@ -578,6 +629,103 @@ HRESULT oppo::ResourceManager::LoadBitmapFromFile(const char* fileName, ID2D1Bit
 
 	return hr;
 }
+HRESULT oppo::ResourceManager::LoadBitmapFromResource(PCWSTR hResource, ID2D1Bitmap** ppBitmap) {
+	IWICBitmapDecoder* pDecoder = NULL;
+	IWICBitmapFrameDecode* pSource = NULL;
+	IWICStream* pStream = NULL;
+	IWICFormatConverter* pConverter = NULL;
+	IWICBitmapScaler* pScaler = NULL;
+
+	HRSRC imageResHandle = NULL;
+	HGLOBAL imageResDataHandle = NULL;
+	void* pImageFile = NULL;
+	DWORD imageFileSize = 0;
+
+	HMODULE hModule = GetModuleHandle(nullptr);
+
+	// locate resource
+	imageResHandle = FindResource(hModule, hResource, MAKEINTRESOURCE(RT_BITMAP));
+	HRESULT hr = imageResHandle ? S_OK : E_FAIL;
+
+	// load resource
+	if (SUCCEEDED(hr)) {
+		imageResDataHandle = LoadResource(hModule, imageResHandle);
+
+		hr = imageResDataHandle ? S_OK : E_FAIL;
+	}
+
+	// lock to system memory pointer
+	if (SUCCEEDED(hr)) {
+		pImageFile = LockResource(imageResDataHandle);
+
+		hr = pImageFile ? S_OK : E_FAIL;
+	}
+
+	// calculate size
+	if (SUCCEEDED(hr)) {
+		imageFileSize = SizeofResource(hModule, imageResHandle);
+
+		hr = imageFileSize ? S_OK : E_FAIL;
+	}
+
+	// create WIC stream
+	if (SUCCEEDED(hr)) {
+		hr = pFactoryWIC->CreateStream(&pStream);
+	}
+
+	// initialize stream
+	if (SUCCEEDED(hr)) {
+		hr = pStream->InitializeFromMemory(
+			reinterpret_cast<BYTE*>(pImageFile),
+			imageFileSize
+		);
+	}
+
+	// create stream decoder
+	if (SUCCEEDED(hr)) {
+		hr = pFactoryWIC->CreateDecoderFromStream(
+			pStream,
+			NULL,
+			WICDecodeMetadataCacheOnLoad,
+			&pDecoder
+		);
+	}
+
+	// create initial frame
+	if (SUCCEEDED(hr)) {
+		hr = pDecoder->GetFrame(0, &pSource);
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pFactoryWIC->CreateFormatConverter(&pConverter);
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pConverter->Initialize(
+			pSource,
+			GUID_WICPixelFormat32bppPBGRA,
+			WICBitmapDitherTypeNone,
+			NULL,
+			0.f,
+			WICBitmapPaletteTypeMedianCut
+		);
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pRT->CreateBitmapFromWicBitmap(
+			pConverter,
+			NULL,
+			ppBitmap
+		);
+	}
+	utility::SafeRelease(&pDecoder);
+	utility::SafeRelease(&pSource);
+	utility::SafeRelease(&pStream);
+	utility::SafeRelease(&pConverter);
+	utility::SafeRelease(&pScaler);
+
+	return hr;
+}
 #pragma endregion
 
 #pragma region Window Manager
@@ -692,11 +840,23 @@ oppo::Result oppo::WindowManager::CreateBitmap(const char* fileName, Bitmap* pBi
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
+oppo::Result oppo::WindowManager::CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap) {
+	HRESULT hr = resourceManager.CreateBitmapFromResource(resource, pBitmap);
+	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
+	return ERRORS::FAIL;
+}
+
 oppo::Result oppo::WindowManager::CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
 	HRESULT hr = resourceManager.CreateSpriteSheet(fileName, spriteSize, spriteCount, padding, pSpriteSheet);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
+oppo::Result oppo::WindowManager::CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet) {
+	HRESULT hr = resourceManager.CreateSpriteSheetFromResource(resource, spriteSize, spriteCount, padding, pSpriteSheet);
+	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
+	return ERRORS::FAIL;
+}
+
 oppo::Result oppo::WindowManager::CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()) {
 	HRESULT hr = resourceManager.CreateSprite(pSprite, pSpriteSheet, spriteRect, spriteIndex);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
