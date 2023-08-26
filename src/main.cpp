@@ -80,7 +80,7 @@ int main() {
 	// init window
 	oppo::WindowManager wm;
 	oppo::WindowPackage wp;
-	wp.backgroundColor = oppo::Color(D2D1::ColorF::Coral);
+	wp.backgroundColor = oppo::Color(oppo::COLORS::CORAL);
 	wp.windowName = "this is the name of the window";
 	wp.szMin = oppo::Size2D(600, 300);
 	wp.szMax = oppo::Size2D(0, 0);

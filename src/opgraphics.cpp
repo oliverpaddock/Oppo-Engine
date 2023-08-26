@@ -941,93 +941,93 @@ oppo::KEYS oppo::WindowManager::TranslateKeystroke(int vkCode) {
 	}
 	switch (vkCode) {
 	case VK_BACK: // backspace
-		return BACK;
+		return KEYS::BACK;
 	case VK_TAB: // tab
-		return TAB;
+		return KEYS::TAB;
 	case VK_RETURN: // enter
-		return ENTER;
+		return KEYS::ENTER;
 	case VK_SHIFT: // shift
-		return SHIFT;
+		return KEYS::SHIFT;
 	case VK_CONTROL: // control
-		return CTRL;
+		return KEYS::CTRL;
 	case VK_CAPITAL: // capslock
-		return CAPS;
+		return KEYS::CAPS;
 	case VK_ESCAPE: // escape
-		return ESCAPE;
+		return KEYS::ESCAPE;
 	case VK_SPACE: // spacebar
-		return SPACE;
+		return KEYS::SPACE;
 	case VK_PRIOR: // pg up
-		return PGUP;
+		return KEYS::PGUP;
 	case VK_NEXT: // pg down
-		return PGDN;
+		return KEYS::PGDN;
 	case VK_END: // end
-		return END;
+		return KEYS::END;
 	case VK_HOME: // home
-		return HOME;
+		return KEYS::HOME;
 	case VK_LEFT: // left arrow
-		return LEFT;
+		return KEYS::LEFT;
 	case VK_UP: // up arrow
-		return UP;
+		return KEYS::UP;
 	case VK_RIGHT: // right arrow
-		return RIGHT;
+		return KEYS::RIGHT;
 	case VK_DOWN: // down arrow
-		return DOWN;
+		return KEYS::DOWN;
 	case VK_INSERT: // insert
-		return INSERT;
+		return KEYS::INSERT;
 	case VK_DELETE: // delete
-		return DELETE;
+		return KEYS::DELETE;
 	case VK_MENU:
-		return ALT;
+		return KEYS::ALT;
 	case VK_MULTIPLY: // numpad multiply
-		return NP_MULTIPLY;
+		return KEYS::NP_MULTIPLY;
 	case VK_ADD: // numpad add
-		return NP_ADD;
+		return KEYS::NP_ADD;
 	case VK_SUBTRACT: // numpad subtract
-		return NP_SUBTRACT;
+		return KEYS::NP_SUBTRACT;
 	case VK_DECIMAL: // numpad decimal
-		return NP_DECIMAL;
+		return KEYS::NP_DECIMAL;
 	case VK_DIVIDE: // numpad divide
-		return NP_DIVIDE;
+		return KEYS::NP_DIVIDE;
 	case VK_NUMLOCK: // num lock
-		return NP_LOCK;
+		return KEYS::NP_LOCK;
 	case VK_SCROLL: // scroll lock
-		return SCROLL_LOCK;
+		return KEYS::SCROLL_LOCK;
 	case VK_VOLUME_MUTE: // volume mute
-		return MEDIA_VOLUME_MUTE;
+		return KEYS::MEDIA_VOLUME_MUTE;
 	case VK_VOLUME_DOWN: // volume down
-		return MEDIA_VOLUME_DOWN;
+		return KEYS::MEDIA_VOLUME_DOWN;
 	case VK_VOLUME_UP: // volume up
-		return MEDIA_VOLUME_UP;
+		return KEYS::MEDIA_VOLUME_UP;
 	case VK_MEDIA_NEXT_TRACK: // next track, not typically found on keyboards but included for specialized controllers
-		return MEDIA_NEXT;
+		return KEYS::MEDIA_NEXT;
 	case VK_MEDIA_PREV_TRACK: // previous track, not typically found on keyboards but included for specialized controllers
-		return MEDIA_PREV;
+		return KEYS::MEDIA_PREV;
 	case VK_MEDIA_STOP: // stop media, not typically found on keyboards but included for specialized controllers
-		return MEDIA_STOP;
+		return KEYS::MEDIA_STOP;
 	case VK_OEM_1: // ;:
-		return COLON;
+		return KEYS::COLON;
 	case VK_OEM_2: // /?
-		return QMARK;
+		return KEYS::QMARK;
 	case VK_OEM_3: // ~
-		return TILDE;
+		return KEYS::TILDE;
 	case VK_OEM_4: // [{
-		return LBRACKET;
+		return KEYS::LBRACKET;
 	case VK_OEM_5: // \|
-		return BSLASH;
+		return KEYS::BSLASH;
 	case VK_OEM_6: // ]}
-		return RBRACKET;
+		return KEYS::RBRACKET;
 	case VK_OEM_7: // '"
-		return QUOTE;
+		return KEYS::QUOTE;
 	case VK_OEM_PLUS: // =+
-		return PLUS;
+		return KEYS::PLUS;
 	case VK_OEM_COMMA: // ,<
-		return COMMA;
+		return KEYS::COMMA;
 	case VK_OEM_MINUS: // -_
-		return MINUS;
+		return KEYS::MINUS;
 	case VK_OEM_PERIOD: // .>
-		return PERIOD;
+		return KEYS::PERIOD;
 	default:
-		return EXTRA;
+		return KEYS::EXTRA;
 	}
 }
 

@@ -1,8 +1,11 @@
 #pragma once
 #include <Windows.h>
 #include <windowsx.h>
-#include <d2d1.h>
+#include <d2d1_3.h>
+#include <d2d1helper.h>
 #pragma comment(lib, "d2d1.lib")
+#include <dwrite_3.h>
+#pragma comment(lib, "dwrite.lib")
 #include <wincodec.h>
 
 #include <memory>
@@ -244,6 +247,7 @@ namespace oppo {
 		ID2D1HwndRenderTarget* pRT;
 		ID2D1Factory* pFactory;
 		IWICImagingFactory* pFactoryWIC;
+		
 		
 		ID2D1Layer* currentLayer = nullptr;
 
