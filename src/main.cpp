@@ -7,6 +7,7 @@ oppo::Camera camera;
 oppo::SpriteSheet SH;
 oppo::Sprite sprite;
 oppo::Bitmap bitmap;
+oppo::TextFormat textFormat;
 
 oppo::Result gameloop(oppo::Event event) {
 	switch (event.type) {
@@ -69,6 +70,9 @@ oppo::Result gameloop(oppo::Event event) {
 		brush.SetColor(oppo::Color(.2f, .4, 1.4, .2));
 		camera.FillShape(oppo::Ellipse(oppo::Point2F(120, 130), 30, 20), brush);
 		camera.DrawSprite(sprite);
+		brush.SetColor(oppo::Color(oppo::COLORS::BLACK));
+		camera.DrawText("testing this is text this is text this is text this is text text text text text", oppo::RectF(-100, -100, 100, 100), textFormat, brush, oppo::TEXT_CLIPPING::CLIP);
+		camera.DrawShape(oppo::RectF(-100, -100, 100, 100), brush);
 		return 0;
 	case oppo::EVENTS::UPDATE:
 		return 0;
@@ -103,11 +107,24 @@ int main() {
 	}
 	if (oppo::Succeeded(r)) {
 		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(1,1));
-		sprite.position = oppo::Point2F(50, 50);
+		sprite.position = oppo::Point2F(0, 0);
+		sprite.rotation = 45;
 	}
 	if (oppo::Succeeded(r)) {
 		//r = wm.CreateBitmapFromResource(MAKEINTRESOURCE(IDB_PNG1), &bitmap);
 		r = wm.CreateBitmap("test spritesheet.png", &bitmap);
+	}
+	if (oppo::Succeeded(r)) {
+		oppo::TextFormatProperties tfp;
+		tfp.fontSize = 32.f;
+		tfp.fontName = oppo::FONTNAMES[oppo::FONTS::CASCADIA_CODE];
+		tfp.fontWeight = oppo::FONT_WEIGHTS::NORMAL;
+		tfp.hAlignment = oppo::TEXT_HORIZONTAL_ALIGNMENT::RIGHT;
+		tfp.vAlignment = oppo::TEXT_VERTICAL_ALIGNMENT::CENTER;
+		tfp.wordWrapping = oppo::TEXT_WRAPPING::CHARACTER_WRAP;
+		tfp.fontStretch = oppo::FONT_STRETCHES::NORMAL;
+		tfp.lineSpacing = 1;
+		r = wm.CreateTextFormat(&textFormat, tfp);
 	}
 	if (oppo::Succeeded(r)) {
 		wm.Run();

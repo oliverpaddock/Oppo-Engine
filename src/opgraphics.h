@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include <windowsx.h>
 #include <d2d1_3.h>
-#include <d2d1helper.h>
 #pragma comment(lib, "d2d1.lib")
 #include <dwrite_3.h>
 #pragma comment(lib, "dwrite.lib")
@@ -47,7 +46,7 @@ namespace oppo::utility {
 
 namespace oppo {
 	/*TODO:
-	* TextLayout
+	* TextFormat
 	* TileMap
 	*/
 	struct WindowPackage {
@@ -122,7 +121,27 @@ namespace oppo {
 		friend class ResourceManager;
 	};
 
-	class TextLayout {};
+	struct TextFormatProperties {
+		const char* fontName = "";
+		float fontSize = 12.f;
+		FONT_WEIGHTS fontWeight = FONT_WEIGHTS::NORMAL;
+		FONT_STYLES fontStyle = FONT_STYLES::NORMAL;
+		FONT_STRETCHES fontStretch = FONT_STRETCHES::NORMAL;
+		TEXT_HORIZONTAL_ALIGNMENT hAlignment = TEXT_HORIZONTAL_ALIGNMENT::LEFT;
+		TEXT_VERTICAL_ALIGNMENT vAlignment = TEXT_VERTICAL_ALIGNMENT::TOP;
+		TEXT_WRAPPING wordWrapping = TEXT_WRAPPING::WRAP;
+		float lineSpacing = 1.f;
+
+		// box clipping, line spacing
+	};
+
+	class TextFormat {
+	public:
+	private:
+		IDWriteTextFormat* pTextFormat;
+		friend class Camera;
+		friend class ResourceManager;
+	};
 
 	class TileMap {};
 
@@ -161,8 +180,7 @@ namespace oppo {
 #ifdef DrawText
 #undef DrawText
 #endif
-		void DrawText(const char*, Point2F, TextLayout);
-		void DrawText(const char*, TextLayout);
+		void DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions = TEXT_CLIPPING::NO_CLIP);
 
 		// read only
 		RectF GetWindowRect();
@@ -174,7 +192,7 @@ namespace oppo {
 		ID2D1Layer** ppCurrentLayer = nullptr;
 		D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters(); // for future geomety masks
 
-		void SafePushLayer();
+		void SafePushLayer(D2D1_MATRIX_3X2_F preTransform = D2D1::IdentityMatrix(), D2D1_MATRIX_3X2_F postTransform = D2D1::IdentityMatrix());
 
 		friend class ResourceManager;
 		friend class WindowManager;
@@ -216,7 +234,7 @@ namespace oppo {
 
 	class ResourceManager {
 		/*TODO:
-		* CreateTextLayout()
+		* CreateTextFormat()
 		* CreateTileMap()
 		*/
 	public:
@@ -233,6 +251,8 @@ namespace oppo {
 		HRESULT CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
 		HRESULT CreateCamera(Camera*);
 
+		HRESULT CreateTextFormat(TextFormat*, TextFormatProperties);
+
 		void DestroyBrush(Brush*);
 		void DestroyBitmap(Bitmap*);
 		void DestroySpriteSheet(SpriteSheet*);
@@ -247,6 +267,7 @@ namespace oppo {
 		ID2D1HwndRenderTarget* pRT;
 		ID2D1Factory* pFactory;
 		IWICImagingFactory* pFactoryWIC;
+		IDWriteFactory* pFactoryWrite;
 		
 		
 		ID2D1Layer* currentLayer = nullptr;
@@ -254,7 +275,7 @@ namespace oppo {
 		std::vector<Brush*> brushes;
 		std::vector<Bitmap*> bitmaps;
 		std::vector<SpriteSheet*> spriteSheets;
-		std::vector<TextLayout*> textLayouts;
+		std::vector<TextFormat*> textFormats;
 		std::vector<TileMap*> tileMaps;
 		std::vector<Camera*> cameras;
 		
@@ -282,6 +303,7 @@ namespace oppo {
 		Result CreateSpriteSheetFromResource(PCWSTR, Size2D, Size2D, Rect, SpriteSheet*);
 		Result CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
 		Result CreateCamera(Camera*);
+		Result CreateTextFormat(TextFormat*, TextFormatProperties);
 
 		void DestroyBrush(Brush*);
 		void DestroyBitmap(Bitmap*);

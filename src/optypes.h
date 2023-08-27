@@ -243,24 +243,7 @@ namespace oppo {
 	using Bezier = utility::_Bezier<Point2F>;
 
 	// colors
-	struct Color {
-		float R = 0., G = 0., B = 0., a = 1.;
-		Color(float R = 0, float G = 0, float B = 0, float a = 1) {
-			this->R = R;
-			this->G = G;
-			this->B = B;
-			this->a = a;
-		}
-		Color(int d2dColor) {
-			D2D1_COLOR_F converter = D2D1::ColorF(d2dColor);
-			this->R = converter.r;
-			this->G = converter.g;
-			this->B = converter.b;
-			this->a = converter.a;
-		}
-	};
-
-	enum COLORS { // direct2d color codes
+	enum class COLORS { // direct2d color codes
 		ALICEBLUE = 0XF0F8FF,
 		ANTIQUEWHITE = 0XFAEBD7,
 		AQUA = 0X00FFFF,
@@ -401,6 +384,23 @@ namespace oppo {
 		WHITESMOKE = 0XF5F5F5,
 		YELLOW = 0XFFFF00,
 		YELLOWGREEN = 0X9ACD32,
+	};
+
+	struct Color {
+		float R = 0., G = 0., B = 0., a = 1.;
+		Color(float R = 0, float G = 0, float B = 0, float a = 1) {
+			this->R = R;
+			this->G = G;
+			this->B = B;
+			this->a = a;
+		}
+		Color(COLORS d2dColor) {
+			D2D1_COLOR_F converter = D2D1::ColorF(static_cast<int>(d2dColor));
+			this->R = converter.r;
+			this->G = converter.g;
+			this->B = converter.b;
+			this->a = converter.a;
+		}
 	};
 }
 #pragma endregion
@@ -578,7 +578,7 @@ namespace oppo {
 
 #pragma region Fonts
 namespace oppo {
-	enum FONTS {
+	enum class FONTS {
 		ARIAL,
 		ARIAL_BLACK,
 		BAHNSCHRIFT,
@@ -645,7 +645,7 @@ namespace oppo {
 	};
 
 
-	inline std::map<FONTS, std::string> FONTNAMES = {
+	inline std::map<FONTS, const char*> FONTNAMES = {
 		{FONTS::ARIAL,					"Arial"					},
 		{FONTS::ARIAL_BLACK,			"Arial Black"			},
 		{FONTS::BAHNSCHRIFT,			"Bahnschrift"			},
@@ -709,6 +709,66 @@ namespace oppo {
 		{FONTS::WEBDINGS,				"Webdings"				},
 		{FONTS::WINGDINGS,				"Wingdings"				},
 		{FONTS::YU_GOTHIC,				"Yu Gothic"				},
+	};
+
+	enum FONT_WEIGHTS {
+		// value between 1 and 999
+		EXTRA_THIN = 50,
+		THIN = 100,
+		EXTRA_LIGHT = 200,
+		LIGHT = 300,
+		NORMAL = 400,
+		MEDIUM = 500,
+		SEMI_BOLD = 600,
+		BOLD = 700,
+		EXTRA_BOLD = 800,
+		BLACK = 900,
+		EXTRA_BLACK = 950,
+	};
+	enum class FONT_STYLES {
+		NORMAL = 0,
+		OBLIQUE = 1,
+		ITALIC = 2,
+	};
+	enum class FONT_STRETCHES {
+		// value between 1 and 9
+		ULTRA_CONDENSED = 1,
+		EXTRA_CONDENSED = 2,
+		CONDENSED = 3,
+		SEMI_CONDENSED = 4,
+		NORMAL = 5,
+		MEDIUM = 5,
+		SEMI_EXPANDED = 6,
+		EXPANDED = 7,
+		EXTRA_EXPANDED = 8,
+		ULTRA_EXPANDED = 9
+	};
+	enum class TEXT_FLOW_DIRECTION {
+		TOP_TO_BOTTOM = 0,
+		BOTTOM_TO_TOP = 1,
+		LEFT_TO_RIGHT = 2,
+		RIGHT_TO_LEFT = 3,
+	};
+	enum class TEXT_HORIZONTAL_ALIGNMENT {
+		LEFT,
+		RIGHT,
+		CENTER,
+	};
+	enum class TEXT_VERTICAL_ALIGNMENT {
+		TOP,
+		BOTTOM,
+		CENTER,
+	};
+	enum class TEXT_WRAPPING {
+		WRAP = 0,
+		NO_WRAP = 1,
+		EMERGENCY_BREAK = 2,
+		WHOLE_WORD_WRAP = 3,
+		CHARACTER_WRAP = 4,
+	};
+	enum class TEXT_CLIPPING {
+		NO_CLIP = 0,
+		CLIP = 2,
 	};
 }
 

@@ -128,18 +128,29 @@ void oppo::Camera::DrawSprite(Sprite sprite) {
 		sprite.position.y + (sprite.rect.top - sprite.position.y) * sprite.scale.height,
 		sprite.position.x + (sprite.rect.right - sprite.position.x) * sprite.scale.width,
 		sprite.position.y + (sprite.rect.bottom - sprite.position.y) * sprite.scale.height);
-
+	D2D1_MATRIX_3X2_F transform;
+	(*ppRT)->GetTransform(&transform);
+	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(sprite.rotation, D2D1::Point2F(sprite.position.x, sprite.position.y)) * transform);
 	D2D1_RECT_F rc = sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex);
 	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, drawRect, sprite.opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
+	(*ppRT)->SetTransform(transform);
 }
 
 void oppo::Camera::DrawTileMap(TileMap tileMap) {
 	SafePushLayer();
 }
 
-void oppo::Camera::DrawText(const char* text, Point2F position, TextLayout textLayout) {}
-
-void oppo::Camera::DrawText(const char* text, TextLayout textLayout) {}
+void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions) {
+	SafePushLayer();
+	(*ppRT)->DrawTextW(
+		utility::StringToWString(text).c_str(),
+		strlen(text),
+		textFormat.pTextFormat,
+		D2D1::RectF(textBox.left, textBox.top, textBox.right, textBox.bottom),
+		brush.pBrush,
+		static_cast<D2D1_DRAW_TEXT_OPTIONS>(clipOptions)
+	);
+}
 
 oppo::RectF oppo::Camera::GetWindowRect() {
 	D2D1_SIZE_F sz = (*ppRT)->GetSize();
@@ -150,7 +161,9 @@ oppo::Size2F oppo::Camera::GetWindowSize() {
 	return (*ppRT)->GetSize();
 }
 
-void oppo::Camera::SafePushLayer() {
+void oppo::Camera::SafePushLayer(D2D1_MATRIX_3X2_F preTransform, D2D1_MATRIX_3X2_F postTransform) {
+	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) * D2D1::Matrix3x2F::Translation(-position.x + sz.width / 2, -position.y + sz.height / 2));
 	if (*ppCurrentLayer == pLayer) return;
 	if (*ppCurrentLayer != nullptr) {
 		(*ppRT)->PopLayer();
@@ -158,8 +171,6 @@ void oppo::Camera::SafePushLayer() {
 	}
 	(*ppRT)->PushLayer(layerParams, pLayer);
 	*ppCurrentLayer = pLayer;
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y))*D2D1::Matrix3x2F::Translation(-position.x + sz.width/2, -position.y + sz.height/2));
 }
 #pragma endregion
 
@@ -356,6 +367,14 @@ HRESULT oppo::ResourceManager::CreateDIResources() {
 		);
 	}
 
+	if (SUCCEEDED(hr)) {
+		hr = DWriteCreateFactory(
+			DWRITE_FACTORY_TYPE_SHARED,
+			__uuidof(IDWriteFactory),
+			reinterpret_cast<IUnknown**>(&pFactoryWrite)
+		);
+	}
+
 	return hr;
 }
 HRESULT oppo::ResourceManager::CreateDDResources(HWND hWnd) {
@@ -409,8 +428,12 @@ HRESULT oppo::ResourceManager::RecreateDDResources(HWND hWnd) {
 }
 
 void oppo::ResourceManager::DestroyDIResources() {
+	for (auto textFormat : textFormats) {
+		utility::SafeRelease(&textFormat->pTextFormat);
+	}
 	utility::SafeRelease(&pFactory);
 	utility::SafeRelease(&pFactoryWIC);
+	utility::SafeRelease(&pFactoryWrite);
 }
 void oppo::ResourceManager::DestroyDDResources() {
 	for (auto pBrush : brushes) {
@@ -541,6 +564,44 @@ HRESULT oppo::ResourceManager::CreateCamera(Camera* pCamera) {
 
 	return hr;
 
+}
+HRESULT oppo::ResourceManager::CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties) {
+	HRESULT hr = E_FAIL;
+	if (pFactoryWrite) {
+		hr = S_OK;
+	}
+	
+	if (SUCCEEDED(hr)) {
+		hr = pFactoryWrite->CreateTextFormat(
+			utility::StringToWString(properties.fontName).c_str(),
+			NULL,
+			static_cast<DWRITE_FONT_WEIGHT>(properties.fontWeight),
+			static_cast<DWRITE_FONT_STYLE>(properties.fontStyle),
+			static_cast<DWRITE_FONT_STRETCH>(properties.fontStretch),
+			properties.fontSize,
+			L"en-us",
+			&pTextFormat->pTextFormat
+		);
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pTextFormat->pTextFormat->SetTextAlignment(static_cast<DWRITE_TEXT_ALIGNMENT>(properties.hAlignment));
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pTextFormat->pTextFormat->SetParagraphAlignment(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(properties.vAlignment));
+	}
+
+	if (SUCCEEDED(hr)) {
+		hr = pTextFormat->pTextFormat->SetWordWrapping(static_cast<DWRITE_WORD_WRAPPING>(properties.wordWrapping));
+	}
+
+	if (SUCCEEDED(hr)) {
+		float lineSpacing = properties.fontSize * (properties.lineSpacing);
+		hr = pTextFormat->pTextFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineSpacing, .8 * lineSpacing);
+	}
+
+	return hr;
 }
 
 void oppo::ResourceManager::DestroyBrush(Brush* pBrush) {
@@ -864,6 +925,11 @@ oppo::Result oppo::WindowManager::CreateSprite(Sprite* pSprite, SpriteSheet* pSp
 }
 oppo::Result oppo::WindowManager::CreateCamera(Camera* pCamera) {
 	HRESULT hr = resourceManager.CreateCamera(pCamera);
+	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
+	return ERRORS::FAIL;
+}
+oppo::Result oppo::WindowManager::CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties) {
+	HRESULT hr = resourceManager.CreateTextFormat(pTextFormat, properties);
 	if (SUCCEEDED(hr)) return ERRORS::SUCCESS;
 	return ERRORS::FAIL;
 }
