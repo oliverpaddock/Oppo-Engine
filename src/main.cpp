@@ -107,8 +107,9 @@ int main() {
 	}
 	if (oppo::Succeeded(r)) {
 		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(1,1));
-		sprite.position = oppo::Point2F(0, 0);
-		sprite.rotation = 45;
+		sprite.position = oppo::Point2F(100, 100);
+		sprite.rotation = 30;
+		sprite.scale = { 2, 1 };
 	}
 	if (oppo::Succeeded(r)) {
 		//r = wm.CreateBitmapFromResource(MAKEINTRESOURCE(IDB_PNG1), &bitmap);

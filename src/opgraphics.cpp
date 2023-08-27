@@ -124,13 +124,14 @@ void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity) {
 void oppo::Camera::DrawSprite(Sprite sprite) {
 	SafePushLayer();
 	D2D1_RECT_F drawRect = D2D1::RectF(
-		sprite.position.x + (sprite.rect.left - sprite.position.x) * sprite.scale.width,
-		sprite.position.y + (sprite.rect.top - sprite.position.y) * sprite.scale.height,
-		sprite.position.x + (sprite.rect.right - sprite.position.x) * sprite.scale.width,
-		sprite.position.y + (sprite.rect.bottom - sprite.position.y) * sprite.scale.height);
+		sprite.position.x + (sprite.rect.left) * sprite.scale.width,
+		sprite.position.y + (sprite.rect.top) * sprite.scale.height,
+		sprite.position.x + (sprite.rect.right) * sprite.scale.width,
+		sprite.position.y + (sprite.rect.bottom) * sprite.scale.height);
+	
 	D2D1_MATRIX_3X2_F transform;
 	(*ppRT)->GetTransform(&transform);
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(sprite.rotation, D2D1::Point2F(sprite.position.x, sprite.position.y)) * transform);
+	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(sprite.rotation, D2D1::Point2F(sprite.position.x, sprite.position.y))*transform);
 	D2D1_RECT_F rc = sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex);
 	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, drawRect, sprite.opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
 	(*ppRT)->SetTransform(transform);
@@ -162,8 +163,6 @@ oppo::Size2F oppo::Camera::GetWindowSize() {
 }
 
 void oppo::Camera::SafePushLayer(D2D1_MATRIX_3X2_F preTransform, D2D1_MATRIX_3X2_F postTransform) {
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) * D2D1::Matrix3x2F::Translation(-position.x + sz.width / 2, -position.y + sz.height / 2));
 	if (*ppCurrentLayer == pLayer) return;
 	if (*ppCurrentLayer != nullptr) {
 		(*ppRT)->PopLayer();
@@ -171,6 +170,8 @@ void oppo::Camera::SafePushLayer(D2D1_MATRIX_3X2_F preTransform, D2D1_MATRIX_3X2
 	}
 	(*ppRT)->PushLayer(layerParams, pLayer);
 	*ppCurrentLayer = pLayer;
+	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) * D2D1::Matrix3x2F::Translation(-position.x + sz.width / 2, -position.y + sz.height / 2));
 }
 #pragma endregion
 
