@@ -162,7 +162,7 @@ oppo::Size2F oppo::Camera::GetWindowSize() {
 	return (*ppRT)->GetSize();
 }
 
-void oppo::Camera::SafePushLayer(D2D1_MATRIX_3X2_F preTransform, D2D1_MATRIX_3X2_F postTransform) {
+void oppo::Camera::SafePushLayer() {
 	if (*ppCurrentLayer == pLayer) return;
 	if (*ppCurrentLayer != nullptr) {
 		(*ppRT)->PopLayer();

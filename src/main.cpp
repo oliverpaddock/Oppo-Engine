@@ -89,7 +89,7 @@ int main() {
 	wp.szMin = oppo::Size2D(600, 300);
 	wp.szMax = oppo::Size2D(0, 0);
 	wp.szScreen = oppo::Size2D(600, 300);
-	wp.aspectRatio = 2;
+	//wp.aspectRatio = 2;
 	wp.ups = 100;
 	wp.aps = 1;
 	wm.RegisterGameLoop(gameloop);
@@ -117,8 +117,8 @@ int main() {
 	}
 	if (oppo::Succeeded(r)) {
 		oppo::TextFormatProperties tfp;
-		tfp.fontSize = 32.f;
-		tfp.fontName = oppo::FONTNAMES[oppo::FONTS::CASCADIA_CODE];
+		tfp.fontSize = 80.f;
+		tfp.fontName = oppo::FONTNAMES[oppo::FONTS::GABRIOLA];
 		tfp.fontWeight = oppo::FONT_WEIGHTS::NORMAL;
 		tfp.hAlignment = oppo::TEXT_HORIZONTAL_ALIGNMENT::RIGHT;
 		tfp.vAlignment = oppo::TEXT_VERTICAL_ALIGNMENT::CENTER;

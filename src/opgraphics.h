@@ -42,6 +42,38 @@ namespace oppo::utility {
 			*ppT = NULL;
 		}
 	}
+
+	class _BasicNode {
+	public:
+		_BasicNode(int nInputs) : nInputs(nInputs) {
+			inputs.resize(nInputs);
+		}
+
+		_BasicNode() {
+			nInputs = 0;
+		}
+
+		void AddInput(int i, _BasicNode& node) {
+			if (i < nInputs) {
+				inputs[i] = &node;
+			}
+		}
+
+		template <typename... T>
+		_BasicNode& operator() (T&&... nodes) {
+			int n = sizeof...(nodes);
+			int i = 0;
+			static_assert(((std::is_same_v<T, Node&> || std::is_same_v<T, int>) && ...), "Must pass valid node or 0 as argument");
+			(AddInput(i++, nodes), ...);
+			return *this;
+		}
+
+	protected:
+		std::vector<_BasicNode*> inputs;
+		int nInputs;
+
+		void AddInput(int i, int n) {}
+	};
 }
 
 namespace oppo {
@@ -145,6 +177,8 @@ namespace oppo {
 
 	class TileMap {};
 
+	class Effect : utility::_BasicNode {};
+
 	class Camera {
 	/*TODO:
 	* DrawShape(Arc) - requires path geometry
@@ -152,7 +186,6 @@ namespace oppo {
 	* FillShape(Geometry)
 	* implement DrawShape(Bezier) - requires path geometry
 	* implement DrawTileMap
-	* implement DrawText
 	*/
 	public:
 		Point2F position = Point2F();
@@ -192,7 +225,7 @@ namespace oppo {
 		ID2D1Layer** ppCurrentLayer = nullptr;
 		D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters(); // for future geomety masks
 
-		void SafePushLayer(D2D1_MATRIX_3X2_F preTransform = D2D1::IdentityMatrix(), D2D1_MATRIX_3X2_F postTransform = D2D1::IdentityMatrix());
+		void SafePushLayer();
 
 		friend class ResourceManager;
 		friend class WindowManager;
@@ -234,8 +267,8 @@ namespace oppo {
 
 	class ResourceManager {
 		/*TODO:
-		* CreateTextFormat()
 		* CreateTileMap()
+		* CreateGeometry()
 		*/
 	public:
 		void Init(WindowManager*);
