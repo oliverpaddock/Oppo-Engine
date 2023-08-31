@@ -14,6 +14,7 @@
 #include <thread>
 #include <random>
 #include <map>
+#include <functional>
 
 #include "optypes.h"
 #include "timer.h"
@@ -63,7 +64,7 @@ namespace oppo::utility {
 		_BasicNode& operator() (T&&... nodes) {
 			int n = sizeof...(nodes);
 			int i = 0;
-			static_assert(((std::is_same_v<T, Node&> || std::is_same_v<T, int>) && ...), "Must pass valid node or 0 as argument");
+			//static_assert(((std::is_same_v<T, Node&> || std::is_same_v<T, int>) && ...), "Must pass valid node or 0 as argument");
 			(AddInput(i++, nodes), ...);
 			return *this;
 		}
@@ -96,7 +97,7 @@ namespace oppo {
 
 	class Brush {
 	public:
-		void SetColor(Color);
+		void SetColor(Color color);
 		Color GetColor();
 		float strokeWidth = 1.f;
 	private:
@@ -193,23 +194,22 @@ namespace oppo {
 		Size2F scale = Size2F(1, 1);
 
 		// drawing commands	
-		void Fill(Color);
-		void Fill(Brush);
-		void FillShape(Rect, Brush);
-		void FillShape(RectF, Brush);
-		void FillShape(RoundedRect, Brush);
-		void FillShape(Ellipse, Brush);
-		void DrawShape(Rect, Brush);
-		void DrawShape(RectF, Brush);
-		void DrawShape(RoundedRect, Brush);
-		void DrawShape(Ellipse, Brush);
-		void DrawShape(Line, Brush);
-		void DrawShape(Bezier, Brush);
+		void Fill(Color color);
+		void Fill(Brush brush);
+		void FillShape(Rect rect, Brush brush);
+		void FillShape(RectF rect, Brush brush);
+		void FillShape(RoundedRect roundedRect, Brush brush);
+		void FillShape(Ellipse ellipse, Brush brush);
+		void DrawShape(Rect rect, Brush brush);
+		void DrawShape(RectF rect, Brush brush);
+		void DrawShape(RoundedRect roundedRect, Brush brush);
+		void DrawShape(Ellipse ellipse, Brush brush);
+		void DrawShape(Line line, Brush brush);
+		void DrawShape(Bezier bezier, Brush brush);
 		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect);
 		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f);
-		void DrawSprite(Sprite);
-		void DrawTileMap(TileMap);
-
+		void DrawSprite(Sprite sprite);
+		void DrawTileMap(TileMap tileMap);
 #ifdef DrawText
 #undef DrawText
 #endif
@@ -230,40 +230,47 @@ namespace oppo {
 		friend class ResourceManager;
 		friend class WindowManager;
 	};
-	
-	struct AnimationFrame {
-		Size2D spriteIndex = Size2D(); // sprite to display
-		Vector2F dPosition = Vector2F(); // change in position
-		float dRot = 0; // change in rotation
-		Size2F dScale = Size2F(); // change in scale, {0, 0} for no change
-	};
 
-	class Animation {
+	class _AnimationBase {
 	public:
-		std::vector<AnimationFrame> frames;
-		int repeatCount = 1; // repeatCount < 0 = infinite loop
-
-		void NewFrames(int); // create empty frames
-		void AddFrames(int);
-
-		Result FrameFromVector(std::vector<AnimationFrame>);
-		Result IndexFromVector(std::vector<Size2D>);
-		Result PosFromVector(std::vector<Vector2F>);
-		Result RotFromVector(std::vector<float>);
-		Result ScaleFromVector(std::vector<Size2F>);
-
-		Result IndexConstValue(Size2D);
-		Result PosConstValue(Vector2F);
-		Result RotConstValue(float);
-		Result ScaleConstValue(Size2F);
-
-		Result IndexLinValue(Size2D, Size2D);
-		Result PosLinValue(Vector2F, Vector2F);
-		Result RotLinValue(float, float);
-		Result ScaleLinValue(Size2F, Size2F);
+		int size = 0;
+		int i = 0;
+		int loop = 0;
+		virtual void NextFrame() {}
+		virtual ~_AnimationBase() {}
+		std::function<void()> callback = nullptr;
 	};
 
-	class AnimationManager {};
+	template <typename T>
+	class _Animation : public _AnimationBase {
+	public:
+		T* source;
+		std::vector<T> values;
+		void NextFrame() {
+			*source = values[i++];
+		}
+	};
+
+	class AnimationManager {
+	public:
+		template <typename T>
+		void AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
+			std::unique_ptr<_Animation<T>> a = std::make_unique<_Animation<T>>();
+			a->source = source;
+			a->values = values;
+			a->size = values.size();
+			a->callback = callback;
+			a->loop = loop;
+			animations.push_back(std::move(a));
+		}
+	
+	private:
+		std::vector<std::unique_ptr<_AnimationBase>> animations;
+
+		void NextFrame();
+	
+		friend class WindowManager;
+	};
 
 	class ResourceManager {
 		/*TODO:
@@ -271,26 +278,25 @@ namespace oppo {
 		* CreateGeometry()
 		*/
 	public:
-		void Init(WindowManager*);
-		HRESULT CreateWindowResources(HWND);
+		void Init(WindowManager* wm);
+		HRESULT CreateWindowResources(HWND hWnd);
 		void DestroyWindowResources();
-		HRESULT RecreateDDResources(HWND);
+		HRESULT RecreateDDResources(HWND hWnd);
 
-		HRESULT CreateBrush(Brush*, Color); // brush
-		HRESULT CreateBitmap(const char*, Bitmap*); // filename, bitmap
-		HRESULT CreateBitmapFromResource(PCWSTR, Bitmap*);
-		HRESULT CreateSpriteSheet(const char*, Size2D, Size2D, Rect, SpriteSheet*); // filename, sprite size, sprite count, padding
-		HRESULT CreateSpriteSheetFromResource(PCWSTR, Size2D, Size2D, Rect, SpriteSheet*);
-		HRESULT CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
-		HRESULT CreateCamera(Camera*);
+		HRESULT CreateBrush(Brush* pBrush, Color color = Color()); // brush
+		HRESULT CreateBitmap(const char* fileName, Bitmap* pBitmap); // filename, bitmap
+		HRESULT CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap);
+		HRESULT CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet); // filename, sprite size, sprite count, padding
+		HRESULT CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet);
+		HRESULT CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()); // sprite, spritesheet, sprite draw rectangle, sprite index
+		HRESULT CreateCamera(Camera* pCamera);
+		HRESULT CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties);
 
-		HRESULT CreateTextFormat(TextFormat*, TextFormatProperties);
-
-		void DestroyBrush(Brush*);
-		void DestroyBitmap(Bitmap*);
-		void DestroySpriteSheet(SpriteSheet*);
-		void DestroySprite(Sprite*);
-		void DestroyCamera(Camera*);
+		void DestroyBrush(Brush* pBrush);
+		void DestroyBitmap(Bitmap* pBitmap);
+		void DestroySpriteSheet(SpriteSheet* pSpriteSheet);
+		void DestroySprite(Sprite* pSprite);
+		void DestroyCamera(Camera* pCamera);
 
 		~ResourceManager() {
 			DestroyWindowResources();
@@ -313,40 +319,45 @@ namespace oppo {
 		std::vector<Camera*> cameras;
 		
 		HRESULT CreateDIResources();
-		HRESULT CreateDDResources(HWND);
+		HRESULT CreateDDResources(HWND hWnd);
 		void DestroyDIResources();
 		void DestroyDDResources();
-		HRESULT LoadBitmapFromFile(const char*, ID2D1Bitmap**);
-		HRESULT LoadBitmapFromResource(PCWSTR hResource, ID2D1Bitmap** pBitmap);
+		HRESULT LoadBitmapFromFile(const char* fileName, ID2D1Bitmap** ppBitmap);
+		HRESULT LoadBitmapFromResource(PCWSTR resource, ID2D1Bitmap** ppBitmap);
 	};
 
 	class WindowManager {
 	public:
-		Result Init(WindowPackage);
+		Result Init(WindowPackage wp);
 		Result Run();
-		void RegisterGameLoop(Result(*Func)(Event));
-		void SetFPS(float);
-		void SetUPS(float);
-		void SetAPS(float);
+		void RegisterGameLoop(std::function<Result(Event)> GameLoopFunc);
+		void SetFPS(float fps);
+		void SetUPS(float ups);
+		void SetAPS(float aps);
 
-		Result CreateBrush(Brush*); // brush
-		Result CreateBitmap(const char*, Bitmap*); // filename, bitmap
-		Result CreateBitmapFromResource(PCWSTR, Bitmap*);
-		Result CreateSpriteSheet(const char*, Size2D, Size2D, Rect, SpriteSheet*); // filename, sprite size, sprite count, padding
-		Result CreateSpriteSheetFromResource(PCWSTR, Size2D, Size2D, Rect, SpriteSheet*);
-		Result CreateSprite(Sprite*, SpriteSheet*, RectF, Size2D); // sprite, spritesheet, sprite draw rectangle, sprite index
-		Result CreateCamera(Camera*);
-		Result CreateTextFormat(TextFormat*, TextFormatProperties);
+		Result CreateBrush(Brush* pBrush); // brush
+		Result CreateBitmap(const char* fileName, Bitmap* pBitmap); // filename, bitmap
+		Result CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap);
+		Result CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet); // filename, sprite size, sprite count, padding
+		Result CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet);
+		Result CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()); // sprite, spritesheet, sprite draw rectangle, sprite index
+		Result CreateCamera(Camera* pCamera);
+		Result CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties);
 
-		void DestroyBrush(Brush*);
-		void DestroyBitmap(Bitmap*);
-		void DestroySpriteSheet(SpriteSheet*);
-		void DestroySprite(Sprite*);
-		void DestroyCamera(Camera*);
+		void DestroyBrush(Brush* pBrush);
+		void DestroyBitmap(Bitmap* pBitmap);
+		void DestroySpriteSheet(SpriteSheet* pSpriteSheet);
+		void DestroySprite(Sprite* pSprite);
+		void DestroyCamera(Camera* pCamera);
 
-
+		template <typename T>
+		void AddAnimation(T* source, std::initializer_list<T> values, int loop = 1, std::function<void()> callback = nullptr) {
+			animationManager.AddAnimation(source, values, loop, callback);
+		}
+		
 	private:
 		ResourceManager resourceManager;
+		AnimationManager animationManager;
 
 		HWND hWnd;
 		ID2D1HwndRenderTarget** ppRT;
@@ -379,13 +390,12 @@ namespace oppo {
 
 		WNDSTATE wndState = WNDSTATE::NONE;
 
-		using Callback = Result(*)(Event);
-		Callback GameLoop = nullptr;
+		std::function<Result(Event)> GameLoop = nullptr;
 
-		LRESULT CALLBACK WindowProc(HWND, UINT, WPARAM, LPARAM);
+		LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		void NewClassName();
 		void GameLoopTimer();
-		KEYS TranslateKeystroke(int);
+		KEYS TranslateKeystroke(int vkCode);
 
 		friend class ResourceManager;
 	};

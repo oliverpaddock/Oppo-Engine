@@ -2,12 +2,17 @@
 #include "resource.h"
 #include <iostream>
 
+oppo::WindowManager wm;
 oppo::Brush brush;
 oppo::Camera camera;
 oppo::SpriteSheet SH;
 oppo::Sprite sprite;
 oppo::Bitmap bitmap;
 oppo::TextFormat textFormat;
+
+void AnimationCallback() {
+	std::cout << "animation callback\n";
+}
 
 oppo::Result gameloop(oppo::Event event) {
 	switch (event.type) {
@@ -19,14 +24,7 @@ oppo::Result gameloop(oppo::Event event) {
 		return 0;
 	case oppo::EVENTS::KEYDOWN:
 		if (event.key == oppo::KEYS::SPACE) {
-			sprite.spriteIndex.width += 1;
-			if (sprite.spriteIndex.width >= 4) {
-				sprite.spriteIndex.width = 0;
-				sprite.spriteIndex.height += 1;
-				if (sprite.spriteIndex.height >= 4) {
-					sprite.spriteIndex.height = 0;
-				}
-			}
+			wm.AddAnimation(&sprite.spriteIndex, { {0,1}, {0,2}, {0,3}, {1,0}, {1,1}, {1,2}, {1,3}, {0,0} }, 2, AnimationCallback);
 		}
 		if (event.key == 'A') {
 			camera.position.x -= 10;
@@ -82,7 +80,6 @@ oppo::Result gameloop(oppo::Event event) {
 
 int main() {
 	// init window
-	oppo::WindowManager wm;
 	oppo::WindowPackage wp;
 	wp.backgroundColor = oppo::Color(oppo::COLORS::CORAL);
 	wp.windowName = "this is the name of the window";
@@ -91,7 +88,7 @@ int main() {
 	wp.szScreen = oppo::Size2D(600, 300);
 	//wp.aspectRatio = 2;
 	wp.ups = 100;
-	wp.aps = 1;
+	wp.aps = 30;
 	wm.RegisterGameLoop(gameloop);
 	oppo::Result r = wm.Init(wp);
 
@@ -106,7 +103,7 @@ int main() {
 		//r = wm.CreateSpriteSheetFromResource(MAKEINTRESOURCE(IDB_PNG1), oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
 	}
 	if (oppo::Succeeded(r)) {
-		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(1,1));
+		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(0,0));
 		sprite.position = oppo::Point2F(100, 100);
 		sprite.rotation = 30;
 		sprite.scale = { 2, 1 };
