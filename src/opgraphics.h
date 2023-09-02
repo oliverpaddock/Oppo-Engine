@@ -231,11 +231,15 @@ namespace oppo {
 		friend class WindowManager;
 	};
 
+	using AnimationID = size_t;
+
 	class _AnimationBase {
 	public:
+		AnimationID id = 0;
 		int size = 0;
 		int i = 0;
 		int loop = 0;
+		bool isPaused = false;
 		virtual void NextFrame() {}
 		virtual ~_AnimationBase() {}
 		std::function<void()> callback = nullptr;
@@ -251,24 +255,37 @@ namespace oppo {
 		}
 	};
 
+
 	class AnimationManager {
 	public:
 		template <typename T>
-		void AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
+		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
 			std::unique_ptr<_Animation<T>> a = std::make_unique<_Animation<T>>();
 			a->source = source;
 			a->values = values;
 			a->size = values.size();
 			a->callback = callback;
 			a->loop = loop;
+			AnimationID id = nextID++;
+			if (id == 0) id = nextID++; // in case 18 quintillion animations have been used
+			a->id = id;
 			animations.push_back(std::move(a));
+			return id;
 		}
-	
+
+		Result RemoveAnimation(AnimationID& id);
+
+		bool AnimationExists(AnimationID id);
+
+		Result PauseAnimation(AnimationID id);
+
+		Result ResumeAnimation(AnimationID id);
+
 	private:
 		std::vector<std::unique_ptr<_AnimationBase>> animations;
-
+		unsigned long long nextID = 1;
 		void NextFrame();
-	
+
 		friend class WindowManager;
 	};
 
@@ -351,10 +368,14 @@ namespace oppo {
 		void DestroyCamera(Camera* pCamera);
 
 		template <typename T>
-		void AddAnimation(T* source, std::initializer_list<T> values, int loop = 1, std::function<void()> callback = nullptr) {
-			animationManager.AddAnimation(source, values, loop, callback);
+		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop = 1, std::function<void()> callback = nullptr) {
+			return animationManager.AddAnimation(source, values, loop, callback);
 		}
-		
+		Result RemoveAnimation(AnimationID& id);
+		Result PauseAnimation(AnimationID id);
+		Result ResumeAnimation(AnimationID id);
+		bool AnimationExists(AnimationID id);
+
 	private:
 		ResourceManager resourceManager;
 		AnimationManager animationManager;

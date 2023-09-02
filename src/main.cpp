@@ -10,69 +10,73 @@ oppo::Sprite sprite;
 oppo::Bitmap bitmap;
 oppo::TextFormat textFormat;
 
+bool right = false;
+bool left = false;
+bool running = false;
+
+oppo::AnimationID idleID = 0;
+oppo::AnimationID movingID = 0;
+
 void AnimationCallback() {
-	std::cout << "animation callback\n";
+	if (running) {
+		movingID = wm.AddAnimation(&sprite.spriteIndex, { {0,1},{0,1},{0,1},{0,1},{1,1},{1,1},{1,1},{1,1} }, 1, AnimationCallback);
+	}
 }
 
 oppo::Result gameloop(oppo::Event event) {
 	switch (event.type) {
-	case oppo::EVENTS::CREATE:
+	case oppo::EVENTS::KEYUP: {
+		if (event.key == oppo::KEYS::LEFT) {
+			left = false;
+		}
+		if (event.key == oppo::KEYS::RIGHT) {
+			right = false;
+		}
+		if (!left && !right) {
+			running = false;
+			wm.RemoveAnimation(movingID);
+		}
 		return 0;
-	case oppo::EVENTS::CLOSE: // returning 0 closes the window, returning -1 cancels the close
-		return 0;
-	case oppo::EVENTS::DESTROY:
-		return 0;
+	}
 	case oppo::EVENTS::KEYDOWN:
-		if (event.key == oppo::KEYS::SPACE) {
-			wm.AddAnimation(&sprite.spriteIndex, { {0,1}, {0,2}, {0,3}, {1,0}, {1,1}, {1,2}, {1,3}, {0,0} }, 2, AnimationCallback);
+		switch (event.key) {
+		case oppo::KEYS::RIGHT: {
+			if (!wm.AnimationExists(movingID)) {
+				movingID = wm.AddAnimation(&sprite.spriteIndex, { {0,1},{0,1},{0,1},{0,1},{1,1},{1,1},{1,1},{1,1} }, 1, AnimationCallback);
+			}
+			running = true;
+			right = true;
+			return 0;
 		}
-		if (event.key == 'A') {
-			camera.position.x -= 10;
+		case oppo::KEYS::LEFT: {
+			if (!wm.AnimationExists(movingID)) {
+				movingID = wm.AddAnimation(&sprite.spriteIndex, { {0,1},{0,1},{0,1},{0,1},{1,1},{1,1},{1,1},{1,1} }, 1, AnimationCallback);
+			}
+			running = true;
+			left = true;
+			return 0;
 		}
-		else if (event.key == 'D') {
-			camera.position.x += 10;
+		case oppo::KEYS::SPACE: {
+			wm.ResumeAnimation(idleID);
+			std::cout << idleID;
+			return 0;
 		}
-		else if (event.key == 'W') {
-			camera.position.y -= 10;
+		case oppo::KEYS::ESCAPE: {
+			wm.PauseAnimation(idleID);
+			return 0;
 		}
-		else if (event.key == 'S') {
-			camera.position.y += 10;
 		}
-		else if (event.key == 'Q') {
-			camera.rotation += 10;
-		}
-		else if (event.key == 'E') {
-			camera.rotation -= 10;
-		}
-		return 0;
-	case oppo::EVENTS::KEYUP:
-		return 0;
-	case oppo::EVENTS::CHAR: // for typing purposes
-		return 0;
-	case oppo::EVENTS::MOUSEMOVE:
-		//std::cout << "mouse x: " << event.mouse.x << "\t" << "mouse y: " << event.mouse.y << std::endl;
-		return 0;
-	case oppo::EVENTS::MOUSESCROLL:
-		return 0;
-	case oppo::EVENTS::MOUSELEAVE:
-		return 0;
-	case oppo::EVENTS::MOUSEDOWN:
-		return 0;
-	case oppo::EVENTS::MOUSEUP:
-		return 0;
-	case oppo::EVENTS::MOUSEDBLCLK:
 		return 0;
 	case oppo::EVENTS::PAINT:
 		brush.SetColor(oppo::Color(1., 0., .5));
-		camera.DrawShape(oppo::RectF(100, 100, 160, 140), brush);
-		brush.SetColor(oppo::Color(.2f, .4, 1.4, .2));
-		camera.FillShape(oppo::Ellipse(oppo::Point2F(120, 130), 30, 20), brush);
+		camera.DrawShape(oppo::RectF(-20, -20, 20, 20), brush);
 		camera.DrawSprite(sprite);
-		brush.SetColor(oppo::Color(oppo::COLORS::BLACK));
-		camera.DrawText("testing this is text this is text this is text this is text text text text text", oppo::RectF(-100, -100, 100, 100), textFormat, brush, oppo::TEXT_CLIPPING::CLIP);
-		camera.DrawShape(oppo::RectF(-100, -100, 100, 100), brush);
 		return 0;
 	case oppo::EVENTS::UPDATE:
+		if (running) {
+			if (right) sprite.position.x += 200 * event.dt;
+			else sprite.position.x -= 200 * event.dt;
+		}
 		return 0;
 	}
 	return 0;
@@ -99,18 +103,13 @@ int main() {
 		r = wm.CreateBrush(&brush);
 	}
 	if (oppo::Succeeded(r)) {
-		r = wm.CreateSpriteSheet("test spritesheet.png", oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
+		r = wm.CreateSpriteSheet("test spritesheet.png", oppo::Size2D(8, 8), oppo::Size2D(2, 2), oppo::Rect(), &SH);
 		//r = wm.CreateSpriteSheetFromResource(MAKEINTRESOURCE(IDB_PNG1), oppo::Size2D(4, 4), oppo::Size2D(4, 4), oppo::Rect(), &SH);
 	}
 	if (oppo::Succeeded(r)) {
 		r = wm.CreateSprite(&sprite, &SH, oppo::RectF(-50, -50, 50, 50), oppo::Size2D(0,0));
+		idleID = wm.AddAnimation(&sprite.spriteIndex, { {0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{1,0},{1,0},{1,0},{1,0},{1,0},{1,0},{1,0}, }, -1);
 		sprite.position = oppo::Point2F(100, 100);
-		sprite.rotation = 30;
-		sprite.scale = { 2, 1 };
-	}
-	if (oppo::Succeeded(r)) {
-		//r = wm.CreateBitmapFromResource(MAKEINTRESOURCE(IDB_PNG1), &bitmap);
-		r = wm.CreateBitmap("test spritesheet.png", &bitmap);
 	}
 	if (oppo::Succeeded(r)) {
 		oppo::TextFormatProperties tfp;

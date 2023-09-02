@@ -160,18 +160,24 @@ void oppo::Camera::SafePushLayer() {
 
 #pragma region Animation Manager
 void oppo::AnimationManager::NextFrame() {
+	std::vector<std::function<void()>> callbacks;
 	for (auto a = animations.begin(); a != animations.end();) {
-		(*a)->NextFrame();
-		if ((*a)->i == (*a)->size) {
-			(*a)->i = 0;
-			if ((*a)->loop > 0) {
-				(*a)->loop--;
-			}
-			if ((*a)->loop == 0) {
-				if ((*a)->callback) {
-					(*a)->callback();
+		if (!(*a)->isPaused) {
+			(*a)->NextFrame();
+			if ((*a)->i == (*a)->size) {
+				(*a)->i = 0;
+				if ((*a)->loop > 0) {
+					(*a)->loop--;
 				}
-				a = animations.erase(a);
+				if ((*a)->loop == 0) {
+					if ((*a)->callback) {
+						callbacks.push_back((*a)->callback);
+					}
+					a = animations.erase(a);
+				}
+				else {
+					a++;
+				}
 			}
 			else {
 				a++;
@@ -181,7 +187,60 @@ void oppo::AnimationManager::NextFrame() {
 			a++;
 		}
 	}
+	for (auto cb : callbacks) {
+		cb();
+	}
 }
+
+oppo::Result oppo::AnimationManager::RemoveAnimation(AnimationID& id) {
+	if (!id) {
+		return oppo::ERRORS::FAIL;
+	}
+	for (auto a = animations.begin(); a != animations.end(); a++) {
+		if ((*a)->id == id) {
+			animations.erase(a);
+			id = 0;
+			return oppo::ERRORS::SUCCESS;
+		}
+	}
+	return oppo::ERRORS::FAIL; // id not found
+}
+bool oppo::AnimationManager::AnimationExists(AnimationID id) {
+	if (!id) {
+		return false;
+	}
+	for (auto a = animations.begin(); a != animations.end(); a++) {
+		if ((*a)->id == id) {
+			return true;
+		}
+	}
+	return false; // id not found
+}
+oppo::Result oppo::AnimationManager::PauseAnimation(AnimationID id) {
+	if (!id) {
+		return oppo::ERRORS::FAIL;
+	}
+	for (auto a = animations.begin(); a != animations.end(); a++) {
+		if ((*a)->id == id) {
+			(*a)->isPaused = true;
+			return oppo::ERRORS::SUCCESS;
+		}
+	}
+	return oppo::ERRORS::FAIL; // id not found
+}
+oppo::Result oppo::AnimationManager::ResumeAnimation(AnimationID id) {
+	if (!id) {
+		return oppo::ERRORS::FAIL;
+	}
+	for (auto a = animations.begin(); a != animations.end(); a++) {
+		if ((*a)->id == id) {
+			(*a)->isPaused = false;
+			return oppo::ERRORS::SUCCESS;
+		}
+	}
+	return oppo::ERRORS::FAIL; // id not found
+}
+
 #pragma endregion
 
 #pragma region Resource Manager
@@ -802,6 +861,22 @@ void oppo::WindowManager::DestroySprite(Sprite* pSprite) {
 }
 void oppo::WindowManager::DestroyCamera(Camera* pCamera) {
 	resourceManager.DestroyCamera(pCamera);
+}
+
+oppo::Result oppo::WindowManager::RemoveAnimation(AnimationID& id) {
+	return animationManager.RemoveAnimation(id);
+}
+
+oppo::Result oppo::WindowManager::PauseAnimation(AnimationID id) {
+	return animationManager.PauseAnimation(id);
+}
+
+oppo::Result oppo::WindowManager::ResumeAnimation(AnimationID id) {
+	return animationManager.ResumeAnimation(id);
+}
+
+bool oppo::WindowManager::AnimationExists(AnimationID id) {
+	return animationManager.AnimationExists(id);
 }
 
 void oppo::WindowManager::NewClassName() {
