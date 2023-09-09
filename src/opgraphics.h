@@ -77,24 +77,12 @@ namespace oppo::utility {
 	};
 }
 
+#pragma region User Graphics
 namespace oppo {
-	/*TODO:
-	* TextFormat
-	* TileMap
-	*/
-	struct WindowPackage {
-		Size2D szScreen = Size2D(); // Screen size on startup, 0 for default
-		Size2D szMin = Size2D(); // Minimum screen size, 0 for no min
-		Size2D szMax = Size2D(); // Maximum screen size, 0 for no max
-		float aspectRatio = 0; // fixed aspect ratio, 0 for unfixed
-		float fps = OP_DEFAULTFPS; // Frames per second
-		float ups = OP_DEFAULTUPS; // Updates per second
-		float aps = OP_DEFAULTAPS; // Animations per second
-		Color backgroundColor = Color(); // Default background color
-		const char* windowName = ""; // Window name
-		int windowID = 0; // sent with events to tell multiple windows apart
+	struct BrushProperties {
+		Color color = Color();
+		float strokewidth = 1.f;
 	};
-
 	class Brush {
 	public:
 		void SetColor(Color color);
@@ -103,22 +91,29 @@ namespace oppo {
 	private:
 		Color color = Color();
 		ID2D1SolidColorBrush* pBrush = nullptr;
-		
+
 		friend class Camera;
-		friend class ResourceManager;
+		friend class _ResourceManager;
 	};
 
+	struct BitmapProperties {
+		const char* fileName;
+	};
 	class Bitmap {
 	protected:
 		std::string fileName;
-		PCWSTR resource;
 		ID2D1Bitmap* pBitmap;
-		bool fromResource = false;
 
 		friend class Camera;
-		friend class ResourceManager;
+		friend class _ResourceManager;
 	};
 
+	struct SpriteSheetProperties {
+		const char* fileName;
+		Size2D spriteSize;
+		Size2D spriteCount = Size2D(1,1);
+		Rect padding = Rect();
+	};
 	class SpriteSheet : Bitmap {
 	public:
 		Size2D SheetResolution();
@@ -135,15 +130,24 @@ namespace oppo {
 		D2D1_RECT_F GetSpriteRect(Size2D spriteIndex);
 
 		friend class Camera;
-		friend class ResourceManager;
+		friend class _ResourceManager;
 	};
 
+	struct SpriteProperties {
+		SpriteSheet* pSpriteSheet;
+		RectF spriteRect;
+		Size2D spriteIndex;
+		float rotation = 0.f;
+		float opacity = 1.f;
+		Size2F scale = Size2F(1, 1);
+		Point2F position = Point2F();
+	};
 	class Sprite {
 	public:
 		RectF rect = RectF();
 		Point2F position = Point2F();
-		float rotation = 0;
-		float opacity = 1;
+		float rotation = 0.f;
+		float opacity = 1.f;
 		Size2F scale = Size2F(1, 1);
 		Size2D spriteIndex = Size2D();
 
@@ -151,7 +155,7 @@ namespace oppo {
 		SpriteSheet* pSpriteSheet;
 
 		friend class Camera;
-		friend class ResourceManager;
+		friend class _ResourceManager;
 	};
 
 	struct TextFormatProperties {
@@ -164,30 +168,40 @@ namespace oppo {
 		TEXT_VERTICAL_ALIGNMENT vAlignment = TEXT_VERTICAL_ALIGNMENT::TOP;
 		TEXT_WRAPPING wordWrapping = TEXT_WRAPPING::WRAP;
 		float lineSpacing = 1.f;
-
-		// box clipping, line spacing
 	};
-
 	class TextFormat {
 	public:
 	private:
 		IDWriteTextFormat* pTextFormat;
 		friend class Camera;
-		friend class ResourceManager;
+		friend class _ResourceManager;
 	};
 
+	struct TileMapProperties {};
 	class TileMap {};
 
-	class Effect : utility::_BasicNode {};
+	struct EffectProperties {};
+	class Effect {};
 
+	enum class CAMERA_REFERENCE {
+		CENTER,
+		TOP_LEFT,
+		TOP_RIGHT,
+		BOTTOM_LEFT,
+		BOTTOM_RIGHT,
+
+	};
+	struct CameraProperties {
+		CAMERA_REFERENCE referencePoint;
+	};
 	class Camera {
-	/*TODO:
-	* DrawShape(Arc) - requires path geometry
-	* DrawShape(Geometry)
-	* FillShape(Geometry)
-	* implement DrawShape(Bezier) - requires path geometry
-	* implement DrawTileMap
-	*/
+		/*TODO:
+		* DrawShape(Arc) - requires path geometry
+		* DrawShape(Geometry)
+		* FillShape(Geometry)
+		* implement DrawShape(Bezier) - requires path geometry
+		* implement DrawTileMap
+		*/
 	public:
 		Point2F position = Point2F();
 		float rotation = 0;
@@ -225,14 +239,25 @@ namespace oppo {
 		ID2D1Layer** ppCurrentLayer = nullptr;
 		D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters(); // for future geomety masks
 
+		CAMERA_REFERENCE refPoint;
+
 		void SafePushLayer();
 
-		friend class ResourceManager;
-		friend class WindowManager;
+		friend class _ResourceManager;
+		friend class Window;
+		friend class _WindowManager;
 	};
 
 	using AnimationID = size_t;
+}
 
+#pragma endregion
+
+#pragma region Backend Graphics
+namespace oppo {
+#ifdef CreateWindow
+#undef CreateWindow
+#endif // CreateWindow
 	class _AnimationBase {
 	public:
 		AnimationID id = 0;
@@ -255,8 +280,7 @@ namespace oppo {
 		}
 	};
 
-
-	class AnimationManager {
+	class _AnimationManager {
 	public:
 		template <typename T>
 		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
@@ -274,48 +298,48 @@ namespace oppo {
 		}
 
 		Result RemoveAnimation(AnimationID& id);
-
-		bool AnimationExists(AnimationID id);
-
 		Result PauseAnimation(AnimationID id);
-
 		Result ResumeAnimation(AnimationID id);
+		Result ResetAnimation(AnimationID id);
+		bool AnimationExists(AnimationID id);
 
 	private:
 		std::vector<std::unique_ptr<_AnimationBase>> animations;
 		unsigned long long nextID = 1;
+
 		void NextFrame();
 
-		friend class WindowManager;
+		friend class _WindowManager;
+		friend class Window;
 	};
-
-	class ResourceManager {
+	class _ResourceManager {
 		/*TODO:
 		* CreateTileMap()
 		* CreateGeometry()
 		*/
 	public:
-		void Init(WindowManager* wm);
+		void Init(Window* wm);
 		HRESULT CreateWindowResources(HWND hWnd);
 		void DestroyWindowResources();
 		HRESULT RecreateDDResources(HWND hWnd);
 
-		HRESULT CreateBrush(Brush* pBrush, Color color = Color()); // brush
-		HRESULT CreateBitmap(const char* fileName, Bitmap* pBitmap); // filename, bitmap
-		HRESULT CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap);
-		HRESULT CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet); // filename, sprite size, sprite count, padding
-		HRESULT CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet);
-		HRESULT CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()); // sprite, spritesheet, sprite draw rectangle, sprite index
-		HRESULT CreateCamera(Camera* pCamera);
+		HRESULT CreateBrush(Brush* pBrush, BrushProperties properties = BrushProperties());
+		HRESULT CreateBitmap(Bitmap* pBitmap, BitmapProperties properties);
+		HRESULT CreateSpriteSheet(SpriteSheet* pSpriteSheet, SpriteSheetProperties properties); // filename, sprite size, sprite count, padding
+		HRESULT CreateSprite(Sprite* pSprite, SpriteProperties properties); // sprite, spritesheet, sprite draw rectangle, sprite index
 		HRESULT CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties);
+		HRESULT CreateTileMap(TileMap* pTileMap, TileMapProperties properties);
+		HRESULT CreateEffect(Effect* pEffect, EffectProperties properties);
+		HRESULT CreateCamera(Camera* pCamera, CameraProperties properties);
 
 		void DestroyBrush(Brush* pBrush);
 		void DestroyBitmap(Bitmap* pBitmap);
 		void DestroySpriteSheet(SpriteSheet* pSpriteSheet);
 		void DestroySprite(Sprite* pSprite);
+		void DestroyTextFormat(TextFormat* pTextFormat);
 		void DestroyCamera(Camera* pCamera);
 
-		~ResourceManager() {
+		~_ResourceManager() {
 			DestroyWindowResources();
 		}
 
@@ -324,8 +348,8 @@ namespace oppo {
 		ID2D1Factory* pFactory;
 		IWICImagingFactory* pFactoryWIC;
 		IDWriteFactory* pFactoryWrite;
-		
-		
+
+
 		ID2D1Layer* currentLayer = nullptr;
 
 		std::vector<Brush*> brushes;
@@ -334,7 +358,7 @@ namespace oppo {
 		std::vector<TextFormat*> textFormats;
 		std::vector<TileMap*> tileMaps;
 		std::vector<Camera*> cameras;
-		
+
 		HRESULT CreateDIResources();
 		HRESULT CreateDDResources(HWND hWnd);
 		void DestroyDIResources();
@@ -343,44 +367,93 @@ namespace oppo {
 		HRESULT LoadBitmapFromResource(PCWSTR resource, ID2D1Bitmap** ppBitmap);
 	};
 
-	class WindowManager {
+	enum WNDSTYLE {
+		DEFAULT = WS_OVERLAPPEDWINDOW, // Default window with a title bar and resize and close buttons
+		BORDER = WS_BORDER, // Window has a title bar but no resize or close buttons
+		DISABLED = WS_DISABLED, // Window doesn't accept user input
+		MINIMIZE = WS_MINIMIZE, // Window is initially minimized
+		MAXIMIZE = WS_MAXIMIZE, // Window is initially maximized
+		MAXBOX = WS_MAXIMIZEBOX | WS_SYSMENU | WS_CAPTION, // Window maximize box and tiling are enabled
+		MINBOX = WS_MINIMIZEBOX | WS_SYSMENU | WS_CAPTION, // Window minimize box and minimizing are enabled
+		OVERLAPPED = WS_OVERLAPPEDWINDOW, // Same as DEFAULT
+		RESIZE = WS_SIZEBOX, // Window can be resized
+		POPUP
+	};
+	struct WindowProperties {
+		const char* name = ""; // window name
+		int id = 0; // user-specified id included in events to identify window
+		int style = WNDSTYLE::DEFAULT; // window style
+		std::function<Result(Event)> GameLoop = nullptr; // game loop function
+		Size2D size = Size2D(); // starting size of the window in pixels
+		Size2D minSize = Size2D(); // minimum allowable window size in pixels, 0 for default
+		Size2D maxSize = Size2D(); // maximum allowable window size in pixels, 0 for default
+		float fps = 60; // frames per second (render speed)
+		float ups = 100; // updates per second
+		float aps = 30; // animations per second
+		Color backgroundColor = Color(); // default background color
+	};
+	class Window {
 	public:
-		Result Init(WindowPackage wp);
-		Result Run();
-		void RegisterGameLoop(std::function<Result(Event)> GameLoopFunc);
-		void SetFPS(float fps);
-		void SetUPS(float ups);
-		void SetAPS(float aps);
-
-		Result CreateBrush(Brush* pBrush); // brush
-		Result CreateBitmap(const char* fileName, Bitmap* pBitmap); // filename, bitmap
-		Result CreateBitmapFromResource(PCWSTR resource, Bitmap* pBitmap);
-		Result CreateSpriteSheet(const char* fileName, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet); // filename, sprite size, sprite count, padding
-		Result CreateSpriteSheetFromResource(PCWSTR resource, Size2D spriteSize, Size2D spriteCount, Rect padding, SpriteSheet* pSpriteSheet);
-		Result CreateSprite(Sprite* pSprite, SpriteSheet* pSpriteSheet, RectF spriteRect, Size2D spriteIndex = Size2D()); // sprite, spritesheet, sprite draw rectangle, sprite index
-		Result CreateCamera(Camera* pCamera);
+		// create window-dependent resources
+		Result CreateBrush(Brush* pBrush, BrushProperties properties);
+		Result CreateBitmap(Bitmap* pBitmap, BitmapProperties properties);
+		Result CreateSpriteSheet(SpriteSheet* pSpriteSheet, SpriteSheetProperties properties);
+		Result CreateSprite(Sprite* pSprite, SpriteProperties properties);
 		Result CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties);
+		Result CreateTileMap(TileMap* pTileMap, TileMapProperties properties);
+		Result CreateEffect(Effect* pEffect, EffectProperties properties);
+		Result CreateCamera(Camera* pCamera, CameraProperties properties);
 
+		// destroy window-dependent resources
 		void DestroyBrush(Brush* pBrush);
 		void DestroyBitmap(Bitmap* pBitmap);
 		void DestroySpriteSheet(SpriteSheet* pSpriteSheet);
 		void DestroySprite(Sprite* pSprite);
+		void DestroyTextFormat(TextFormat* pTextFormat);
+		void DestroyTileMap(TileMap* pTileMap);
+		void DestroyEffect(Effect* pEffect);
 		void DestroyCamera(Camera* pCamera);
 
+		// animations
 		template <typename T>
-		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop = 1, std::function<void()> callback = nullptr) {
-			return animationManager.AddAnimation(source, values, loop, callback);
+		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
+			animationManager.AddAnimation(source, values, loop, callback);
 		}
 		Result RemoveAnimation(AnimationID& id);
 		Result PauseAnimation(AnimationID id);
 		Result ResumeAnimation(AnimationID id);
+		Result ResetAnimation(AnimationID id);
 		bool AnimationExists(AnimationID id);
 
+		// set window properties
+		void SetFPS(float fps);
+		void SetUPS(float ups);
+		void SetAPS(float aps);
+		void SetSize(Size2D size);
+		void SetPosition(Point2D position);
+		void SetMousePosition(Point2D position);
+		void SetMouseCapture(bool isCaptured);
+		void SetMaximize(bool isMaximized);
+		void SetMinimize(bool isMinimized);
+		void SetFullscreen(bool isFullscreen);
+
+		void SetScene(std::function<Result(Event)> newScene);
+
+		// get window properties
+		Size2D GetSize();
+		Point2D GetPosition();
+
 	private:
-		ResourceManager resourceManager;
-		AnimationManager animationManager;
+		_ResourceManager resourceManager;
+		_AnimationManager animationManager;
 
 		HWND hWnd;
+
+		// fullscreen
+		WINDOWPLACEMENT wpPrev = { sizeof(wpPrev) };
+		DWORD dwStylePrev;
+		bool isFullscreen = false;
+
 		ID2D1HwndRenderTarget** ppRT;
 		ID2D1Layer** ppCurrentLayer;
 		TRACKMOUSEEVENT tme;
@@ -410,14 +483,39 @@ namespace oppo {
 		};
 
 		WNDSTATE wndState = WNDSTATE::NONE;
+		void SetWndStateCreate() {
+			wndState = WNDSTATE::CREATE;
+		}
 
 		std::function<Result(Event)> GameLoop = nullptr;
 
-		LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		void NewClassName();
 		void GameLoopTimer();
 		KEYS TranslateKeystroke(int vkCode);
+		LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-		friend class ResourceManager;
+		friend class _ResourceManager;
+		friend class _Engine;
 	};
+
+	class _Engine {
+	public:
+		_Engine(const _Engine& obj) = delete;
+		static Result AddWindow(Window* wnd, WindowProperties properties);
+		static void RemoveWindow(Window* wnd);
+		static void Terminate();
+
+		static void Run();
+
+	private:
+		static std::vector<HWND> windows;
+		_Engine();
+	};
+
+	Result CreateWindow(Window* wnd, WindowProperties properties);
+
+	void Run();
+
+	void Terminate();
 }
+#pragma endregion

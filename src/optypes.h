@@ -387,8 +387,8 @@ namespace oppo {
 	};
 
 	struct Color {
-		float R = 0., G = 0., B = 0., a = 1.;
-		Color(float R = 0, float G = 0, float B = 0, float a = 1) {
+		float R = 0.f, G = 0.f, B = 0.f, a = 1.f;
+		Color(float R = 0.f, float G = 0.f, float B = 0.f, float a = 1.f) {
 			this->R = R;
 			this->G = G;
 			this->B = B;
@@ -406,6 +406,67 @@ namespace oppo {
 #pragma endregion
 
 #pragma region Events
+namespace oppo::utility {
+	struct _NoneEvent {};
+	struct _CreateEvent {};
+	struct _CloseEvent {};
+	struct _DestroyEvent {};
+	struct _SetSceneEvent {};
+	struct _EndSceneEvent {};
+	struct _KeyDownEvent {
+		long long key;
+		bool alt;
+	};
+	struct _KeyUpEvent {
+		long long key;
+		bool alt;
+	};
+	struct _CharEvent {
+		char character;
+		short repeat;
+		bool alt;
+	};
+	struct _MouseMoveEvent {
+		long x;
+		long y;
+		bool alt;
+	};
+	struct _MouseLeaveEvent {
+		long x;
+		long y;
+		bool alt;
+	};
+	struct _MouseDownEvent {
+		long long key;
+		long x;
+		long y;
+		bool alt;
+	};
+	struct _MouseDblClkEvent {
+		long long key;
+		long x;
+		long y;
+		bool alt;
+	};
+	struct _MouseUpEvent {
+		long long key;
+		long x;
+		long y;
+		bool alt;
+	};
+	struct _MouseScrollEvent {
+		long x;
+		long y;
+		long hScroll;
+		long vScroll;
+		bool alt;
+	};
+	struct _PaintEvent {};
+	struct _UpdateEvent {
+		double dt;
+	};
+}
+
 namespace oppo {
 	// window
 	enum class EVENTS {
@@ -415,6 +476,8 @@ namespace oppo {
 		CREATE,
 		CLOSE,
 		DESTROY,
+		SETSCENE,
+		ENDSCENE,
 
 		// user input
 		KEYDOWN,
@@ -438,30 +501,24 @@ namespace oppo {
 		int windowID = 0;
 
 		union {
-			long long aParam = 0; // general purpose
-			double dt; // used for timer events
-			long long key; // oppo::KEYS key
-			char character; // key characters
-			struct {
-				long x; // horizontal mousewheel
-				long y; // vertical mousewheel
-			} mouseWheel;
-		};
-
-		union {
-			long long bParam = 0; // general purpose
-			struct {
-				long x; // mouse x position
-				long y; // mouse y position
-			} mouse;
-		};
-
-		struct {
-			unsigned int repeat : 16; // character repeat count
-			unsigned int vScroll : 1; // vertical scroll flag
-			unsigned int hScroll : 1; // horizontal scroll flag
-			unsigned int alt : 1; // alt key down
-		} flags;
+			utility::_NoneEvent none = { };
+			utility::_CreateEvent create;
+			utility::_CloseEvent close;
+			utility::_DestroyEvent destroy;
+			utility::_SetSceneEvent setScene;
+			utility::_EndSceneEvent endScene;
+			utility::_KeyDownEvent keyDown;
+			utility::_KeyUpEvent keyUp;
+			utility::_CharEvent character;
+			utility::_MouseMoveEvent mouseMove;
+			utility::_MouseLeaveEvent mouseLeave;
+			utility::_MouseDownEvent mouseDown;
+			utility::_MouseDblClkEvent mouseDblClk;
+			utility::_MouseUpEvent mouseUp;
+			utility::_MouseScrollEvent mouseScroll;
+			utility::_PaintEvent paint;
+			utility::_UpdateEvent update;
+		} as;
 	};
 }
 #pragma endregion
