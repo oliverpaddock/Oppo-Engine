@@ -402,6 +402,9 @@ namespace oppo {
 			this->a = converter.a;
 		}
 	};
+
+	// transformations
+	using Transform = D2D1::Matrix3x2F;
 }
 #pragma endregion
 

@@ -137,18 +137,10 @@ namespace oppo {
 		SpriteSheet* pSpriteSheet;
 		RectF spriteRect;
 		Size2D spriteIndex;
-		float rotation = 0.f;
-		float opacity = 1.f;
-		Size2F scale = Size2F(1, 1);
-		Point2F position = Point2F();
 	};
 	class Sprite {
 	public:
 		RectF rect = RectF();
-		Point2F position = Point2F();
-		float rotation = 0.f;
-		float opacity = 1.f;
-		Size2F scale = Size2F(1, 1);
 		Size2D spriteIndex = Size2D();
 
 	private:
@@ -182,7 +174,7 @@ namespace oppo {
 
 	struct EffectProperties {};
 	class Effect {};
-
+	
 	enum class CAMERA_REFERENCE {
 		CENTER,
 		TOP_LEFT,
@@ -210,35 +202,34 @@ namespace oppo {
 		// drawing commands	
 		void Fill(Color color);
 		void Fill(Brush brush);
-		void FillShape(Rect rect, Brush brush);
-		void FillShape(RectF rect, Brush brush);
-		void FillShape(RoundedRect roundedRect, Brush brush);
-		void FillShape(Ellipse ellipse, Brush brush);
-		void DrawShape(Rect rect, Brush brush);
-		void DrawShape(RectF rect, Brush brush);
-		void DrawShape(RoundedRect roundedRect, Brush brush);
-		void DrawShape(Ellipse ellipse, Brush brush);
-		void DrawShape(Line line, Brush brush);
-		void DrawShape(Bezier bezier, Brush brush);
-		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect);
-		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f);
-		void DrawSprite(Sprite sprite);
-		void DrawTileMap(TileMap tileMap);
+		void FillShape(Rect rect, Brush brush, Transform tf = Transform::Identity());
+		void FillShape(RectF rect, Brush brush, Transform tf = Transform::Identity());
+		void FillShape(RoundedRect roundedRect, Brush brush, Transform tf = Transform::Identity());
+		void FillShape(Ellipse ellipse, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(Rect rect, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(RectF rect, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(RoundedRect roundedRect, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(Ellipse ellipse, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(Line line, Brush brush, Transform tf = Transform::Identity());
+		void DrawShape(Bezier bezier, Brush brush, Transform tf = Transform::Identity());
+		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect, Transform tf = Transform::Identity());
+		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f, Transform tf = Transform::Identity());
+		void DrawSprite(Sprite sprite, float opacity = 1.f, Transform tf = Transform::Identity());
+		void DrawTileMap(TileMap tileMap, Transform tf = Transform::Identity());
 #ifdef DrawText
 #undef DrawText
 #endif
-		void DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions = TEXT_CLIPPING::NO_CLIP);
+		void DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions = TEXT_CLIPPING::NO_CLIP, Transform tf = Transform::Identity());
 
 		// read only
-		RectF GetWindowRect();
-		Size2F GetWindowSize();
+		RectF GetRect();
+		Size2F GetSize();
 
 	private:
 		ID2D1HwndRenderTarget** ppRT = nullptr;
 		ID2D1Layer* pLayer = nullptr;
 		ID2D1Layer** ppCurrentLayer = nullptr;
 		D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters(); // for future geomety masks
-
 		CAMERA_REFERENCE refPoint;
 
 		void SafePushLayer();
@@ -417,7 +408,7 @@ namespace oppo {
 		// animations
 		template <typename T>
 		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
-			animationManager.AddAnimation(source, values, loop, callback);
+			return animationManager.AddAnimation(source, values, loop, callback);
 		}
 		Result RemoveAnimation(AnimationID& id);
 		Result PauseAnimation(AnimationID id);

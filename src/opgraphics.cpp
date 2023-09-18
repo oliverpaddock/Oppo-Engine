@@ -390,6 +390,8 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	case WM_DESTROY: {
 		wndState = WNDSTATE::DESTROY;
 		if (GameLoop) {
+			e.type = EVENTS::ENDSCENE;
+			GameLoop(e);
 			e.type = EVENTS::DESTROY;
 			GameLoop(e);
 		}
@@ -840,73 +842,176 @@ void oppo::Camera::Fill(Brush brush) {
 	SafePushLayer();
 	(*ppRT)->Clear(D2D1::ColorF(brush.color.R, brush.color.G, brush.color.B, brush.color.a));
 }
-void oppo::Camera::FillShape(Rect rect, Brush brush) {
+void oppo::Camera::FillShape(Rect rect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::FillShape(RectF rect, Brush brush) {
+void oppo::Camera::FillShape(RectF rect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::FillShape(RoundedRect roundedRect, Brush brush) {
+void oppo::Camera::FillShape(RoundedRect roundedRect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::FillShape(Ellipse ellipse, Brush brush) {
+void oppo::Camera::FillShape(Ellipse ellipse, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->FillEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(Rect rect, Brush brush) {
+void oppo::Camera::DrawShape(Rect rect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(RectF rect, Brush brush) {
+void oppo::Camera::DrawShape(RectF rect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(RoundedRect roundedRect, Brush brush) {
+void oppo::Camera::DrawShape(RoundedRect roundedRect, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush, brush.strokeWidth);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(Ellipse ellipse, Brush brush) {
+void oppo::Camera::DrawShape(Ellipse ellipse, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush, brush.strokeWidth);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(Line line, Brush brush) {
+void oppo::Camera::DrawShape(Line line, Brush brush, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawLine(D2D1::Point2F(line.p0.x, line.p0.y), D2D1::Point2F(line.p1.x, line.p1.y), brush.pBrush, brush.strokeWidth);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawShape(Bezier bezier, Brush brush) {
+void oppo::Camera::DrawShape(Bezier bezier, Brush brush, Transform tf) {
 	SafePushLayer();
 }
-void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect) {
+void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, D2D1::RectF(sourceRect.left, sourceRect.top, sourceRect.right, sourceRect.bottom));
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity) {
+void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawSprite(Sprite sprite) {
+void oppo::Camera::DrawSprite(Sprite sprite, float opacity, Transform tf) {
 	SafePushLayer();
-	D2D1_RECT_F drawRect = D2D1::RectF(
-		sprite.position.x + (sprite.rect.left) * sprite.scale.width,
-		sprite.position.y + (sprite.rect.top) * sprite.scale.height,
-		sprite.position.x + (sprite.rect.right) * sprite.scale.width,
-		sprite.position.y + (sprite.rect.bottom) * sprite.scale.height);
-	
-	D2D1_MATRIX_3X2_F transform;
-	(*ppRT)->GetTransform(&transform);
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(sprite.rotation, D2D1::Point2F(sprite.position.x, sprite.position.y))*transform);
-	D2D1_RECT_F rc = sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex);
-	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, drawRect, sprite.opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
-	(*ppRT)->SetTransform(transform);
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
+	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, D2D1::RectF(sprite.rect.left, sprite.rect.top, sprite.rect.right, sprite.rect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
-void oppo::Camera::DrawTileMap(TileMap tileMap) {
+void oppo::Camera::DrawTileMap(TileMap tileMap, Transform tf) {
 	SafePushLayer();
 }
-void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions) {
+void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions, Transform tf) {
 	SafePushLayer();
+	bool isIdentity = tf.IsIdentity();
+	Transform cameraTF;
+	if (!isIdentity) {
+		(*ppRT)->GetTransform(&cameraTF);
+		(*ppRT)->SetTransform(tf * cameraTF);
+	}
 	(*ppRT)->DrawTextW(
 		utility::StringToWString(text).c_str(),
 		strlen(text),
@@ -915,9 +1020,12 @@ void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textForm
 		brush.pBrush,
 		static_cast<D2D1_DRAW_TEXT_OPTIONS>(clipOptions)
 	);
+	if (!isIdentity) {
+		(*ppRT)->SetTransform(cameraTF);
+	}
 }
 
-oppo::RectF oppo::Camera::GetWindowRect() {
+oppo::RectF oppo::Camera::GetRect() {
 	D2D1_SIZE_F sz = (*ppRT)->GetSize();
 	RectF rc;
 	if (refPoint == CAMERA_REFERENCE::CENTER) {
@@ -946,7 +1054,7 @@ oppo::RectF oppo::Camera::GetWindowRect() {
 	}
 	return rc;
 }
-oppo::Size2F oppo::Camera::GetWindowSize() {
+oppo::Size2F oppo::Camera::GetSize() {
 	return (*ppRT)->GetSize();
 }
 
@@ -961,7 +1069,7 @@ void oppo::Camera::SafePushLayer() {
 	D2D1_SIZE_F sz = (*ppRT)->GetSize();
 	
 	
-	Point2F offset = Point2F();
+	D2D1_POINT_2F offset = D2D1::Point2F();
 	if (refPoint == CAMERA_REFERENCE::CENTER) {
 		offset.x = sz.width / 2;
 		offset.y = sz.height / 2;
@@ -975,7 +1083,11 @@ void oppo::Camera::SafePushLayer() {
 		}
 	}
 	D2D1_MATRIX_3X2_F transform;
-	(*ppRT)->SetTransform(D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) * D2D1::Matrix3x2F::Translation(-position.x + offset.x, -position.y + offset.y));
+	(*ppRT)->SetTransform(
+		D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) 
+		* D2D1::Matrix3x2F::Translation(-position.x + offset.x, -position.y + offset.y)
+		* D2D1::Matrix3x2F::Scale(D2D1::SizeF(scale.width, scale.height), offset)
+	);
 }
 #pragma endregion
 
@@ -1319,6 +1431,7 @@ HRESULT oppo::_ResourceManager::CreateCamera(Camera* pCamera, CameraProperties p
 	}
 	if (SUCCEEDED(hr)) {
 		pCamera->ppCurrentLayer = &currentLayer;
+		pCamera->refPoint = properties.referencePoint;
 		if (std::find(cameras.begin(), cameras.end(), pCamera) == cameras.end()) {
 			cameras.push_back(pCamera);
 		}
@@ -1349,9 +1462,6 @@ void oppo::_ResourceManager::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
 void oppo::_ResourceManager::DestroySprite(Sprite* pSprite) {
 	pSprite->pSpriteSheet = nullptr;
 	pSprite->rect = RectF();
-	pSprite->position = Point2F();
-	pSprite->rotation = 0;
-	pSprite->scale = Size2F(1, 1);
 	pSprite->spriteIndex = Size2D();
 }
 void oppo::_ResourceManager::DestroyTextFormat(TextFormat* pTextFormat) {
