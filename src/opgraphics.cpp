@@ -1,5 +1,6 @@
 #include "opgraphics.h"
 #include <iostream>
+#include <cmath>
 #pragma region Utility
 std::wstring oppo::utility::StringToWString(const std::string& str)
 {
@@ -1025,8 +1026,35 @@ void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textForm
 	}
 }
 
+void oppo::Camera::ZoomToWidth(float width) {
+	Size2F sz = (*ppRT)->GetSize();
+	float newScale = sz.width / width;
+	scale = Size2F(newScale, newScale);
+}
+void oppo::Camera::ZoomToHeight(float height) {
+	Size2F sz = (*ppRT)->GetSize();
+	float newScale = sz.height / height;
+	scale = Size2F(newScale, newScale);
+}
+void oppo::Camera::ZoomToFit(Size2F size) {
+	Size2F currentSize = (*ppRT)->GetSize();
+	float scaleX = currentSize.width / size.width;
+	float scaleY = currentSize.height / size.height;
+	float newScale = min(scaleX, scaleY);
+	scale = Size2F(newScale, newScale);
+}
+void oppo::Camera::ZoomToFill(Size2F size) {
+	Size2F currentSize = (*ppRT)->GetSize();
+	float scaleX = currentSize.width / size.width;
+	float scaleY = currentSize.height / size.height;
+	float newScale = max(scaleX, scaleY);
+	scale = Size2F(newScale, newScale);
+}
+
 oppo::RectF oppo::Camera::GetRect() {
 	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	sz.width /= scale.width;
+	sz.height /= scale.height;
 	RectF rc;
 	if (refPoint == CAMERA_REFERENCE::CENTER) {
 		rc.left = position.x - sz.width / 2;
@@ -1055,7 +1083,10 @@ oppo::RectF oppo::Camera::GetRect() {
 	return rc;
 }
 oppo::Size2F oppo::Camera::GetSize() {
-	return (*ppRT)->GetSize();
+	Size2F size = (*ppRT)->GetSize();
+	size.width /= scale.width;
+	size.height /= scale.height;
+	return size;
 }
 
 void oppo::Camera::SafePushLayer() {

@@ -221,6 +221,12 @@ namespace oppo {
 #endif
 		void DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions = TEXT_CLIPPING::NO_CLIP, Transform tf = Transform::Identity());
 
+		// zoom
+		void ZoomToWidth(float width);
+		void ZoomToHeight(float height);
+		void ZoomToFit(Size2F size);
+		void ZoomToFill(Size2F size);
+
 		// read only
 		RectF GetRect();
 		Size2F GetSize();
