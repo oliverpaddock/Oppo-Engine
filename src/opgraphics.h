@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <windowsx.h>
 #include <d2d1_3.h>
+#include <d2d1helper.h>
 #pragma comment(lib, "d2d1.lib")
 #include <dwrite_3.h>
 #pragma comment(lib, "dwrite.lib")
@@ -226,6 +227,10 @@ namespace oppo {
 		void ZoomToHeight(float height);
 		void ZoomToFit(Size2F size);
 		void ZoomToFill(Size2F size);
+
+		// screen to world conversion
+		Point2F ScreenToWorld(Point2D point);
+		Point2D WorldToScreen(Point2F point);
 
 		// read only
 		RectF GetRect();

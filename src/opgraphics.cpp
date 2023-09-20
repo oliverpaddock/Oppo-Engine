@@ -1051,6 +1051,55 @@ void oppo::Camera::ZoomToFill(Size2F size) {
 	scale = Size2F(newScale, newScale);
 }
 
+oppo::Point2F oppo::Camera::ScreenToWorld(Point2D point) {
+	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	D2D1_POINT_2F offset = D2D1::Point2F();
+	if (refPoint == CAMERA_REFERENCE::CENTER) {
+		offset.x = sz.width / 2;
+		offset.y = sz.height / 2;
+	}
+	else {
+		if (refPoint == CAMERA_REFERENCE::TOP_RIGHT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+			offset.x = sz.width;
+		}
+		if (refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+			offset.y = sz.height;
+		}
+	}
+	D2D1::Matrix3x2F m =
+		D2D1::Matrix3x2F::Translation(position.x - offset.x, position.y - offset.y)
+		* D2D1::Matrix3x2F::Rotation(-rotation, D2D1::Point2F(position.x, position.y))
+		* D2D1::Matrix3x2F::Scale(D2D1::SizeF(1 / scale.width, 1 / scale.height), D2D1::Point2F(position.x, position.y));
+	return Point2F(
+		(m._11 * point.x) + (m._21 * point.y) + m._31,
+		(m._12 * point.x) + (m._22 * point.y) + m._32
+	);
+}
+oppo::Point2D oppo::Camera::WorldToScreen(Point2F point) {
+	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	D2D1_POINT_2F offset = D2D1::Point2F();
+	if (refPoint == CAMERA_REFERENCE::CENTER) {
+		offset.x = sz.width / 2;
+		offset.y = sz.height / 2;
+	}
+	else {
+		if (refPoint == CAMERA_REFERENCE::TOP_RIGHT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+			offset.x = sz.width;
+		}
+		if (refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+			offset.y = sz.height;
+		}
+	}
+	D2D1::Matrix3x2F m =
+		D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y))
+		* D2D1::Matrix3x2F::Translation(offset.x - position.x, offset.y - position.y)
+		* D2D1::Matrix3x2F::Scale(D2D1::SizeF(scale.width, scale.height), offset);
+	return Point2D(
+		(m._11 * point.x) + (m._21 * point.y) + m._31,
+		(m._12 * point.x) + (m._22 * point.y) + m._32
+	);
+}
+
 oppo::RectF oppo::Camera::GetRect() {
 	D2D1_SIZE_F sz = (*ppRT)->GetSize();
 	sz.width /= scale.width;
@@ -1115,9 +1164,9 @@ void oppo::Camera::SafePushLayer() {
 	}
 	D2D1_MATRIX_3X2_F transform;
 	(*ppRT)->SetTransform(
-		D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) 
-		* D2D1::Matrix3x2F::Translation(-position.x + offset.x, -position.y + offset.y)
-		* D2D1::Matrix3x2F::Scale(D2D1::SizeF(scale.width, scale.height), offset)
+		D2D1::Matrix3x2F::Scale(D2D1::SizeF(scale.width, scale.height), D2D1::Point2F(position.x, position.y))
+		* D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) 
+		* D2D1::Matrix3x2F::Translation(offset.x - position.x, offset.y - position.y)
 	);
 }
 #pragma endregion
