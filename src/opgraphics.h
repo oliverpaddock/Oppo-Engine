@@ -90,8 +90,8 @@ namespace oppo {
 		Color GetColor();
 		float strokeWidth = 1.f;
 	private:
-		Color color = Color();
-		ID2D1SolidColorBrush* pBrush = nullptr;
+		Color _color = Color();
+		ID2D1SolidColorBrush* _pBrush = nullptr;
 
 		friend class Camera;
 		friend class _ResourceManager;
@@ -102,8 +102,8 @@ namespace oppo {
 	};
 	class Bitmap {
 	protected:
-		std::string fileName;
-		ID2D1Bitmap* pBitmap;
+		std::string _fileName;
+		ID2D1Bitmap* _pBitmap;
 
 		friend class Camera;
 		friend class _ResourceManager;
@@ -117,16 +117,14 @@ namespace oppo {
 	};
 	class SpriteSheet : Bitmap {
 	public:
-		Size2D SheetResolution();
-		Size2D SpriteResolution();
-		Size2D SpriteCount();
-		Rect   Padding();
+		Size2D GetSpriteSize();
+		Size2D GetSpriteCount();
+		Rect   GetPadding();
 
 	private:
-		Size2D pxSheetResolution;
-		Size2D pxSpriteResolution;
-		Size2D spriteCount;
-		Rect padding;
+		Size2D _spriteSize;
+		Size2D _spriteCount;
+		Rect _padding;
 
 		D2D1_RECT_F GetSpriteRect(Size2D spriteIndex);
 
@@ -145,7 +143,7 @@ namespace oppo {
 		Size2D spriteIndex = Size2D();
 
 	private:
-		SpriteSheet* pSpriteSheet;
+		SpriteSheet* _pSpriteSheet;
 
 		friend class Camera;
 		friend class _ResourceManager;
@@ -165,7 +163,7 @@ namespace oppo {
 	class TextFormat {
 	public:
 	private:
-		IDWriteTextFormat* pTextFormat;
+		IDWriteTextFormat* _pTextFormat;
 		friend class Camera;
 		friend class _ResourceManager;
 	};
@@ -176,13 +174,15 @@ namespace oppo {
 	struct EffectProperties {};
 	class Effect {};
 	
+	/// <summary>
+	/// Reference position on the window for camera position.
+	/// </summary>
 	enum class CAMERA_REFERENCE {
 		CENTER,
 		TOP_LEFT,
 		TOP_RIGHT,
 		BOTTOM_LEFT,
 		BOTTOM_RIGHT,
-
 	};
 	struct CameraProperties {
 		CAMERA_REFERENCE referencePoint;
@@ -201,49 +201,131 @@ namespace oppo {
 		Size2F scale = Size2F(1, 1);
 
 		// drawing commands	
+		
+		/// <summary>
+		/// Fill the screen with the specified color.
+		/// </summary>
 		void Fill(Color color);
+		/// <summary>
+		/// Fill the screen with the color of the brush.
+		/// </summary>
 		void Fill(Brush brush);
+		/// <summary>
+		/// Draw a filled shape.
+		/// </summary>
 		void FillShape(Rect rect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a filled shape.
+		/// </summary>
 		void FillShape(RectF rect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a filled shape.
+		/// </summary>
 		void FillShape(RoundedRect roundedRect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a filled shape.
+		/// </summary>
 		void FillShape(Ellipse ellipse, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(Rect rect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(RectF rect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(RoundedRect roundedRect, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(Ellipse ellipse, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(Line line, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw an outlined shape.
+		/// </summary>
 		void DrawShape(Bezier bezier, Brush brush, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a bitmap to the specified rectangle.
+		/// </summary>
 		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a bitmap to the specified rectangle.
+		/// </summary>
 		void DrawBitmap(Bitmap bitmap, RectF destRect, float opacity = 1.f, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a sprite.
+		/// </summary>
 		void DrawSprite(Sprite sprite, float opacity = 1.f, Transform tf = Transform::Identity());
+		/// <summary>
+		/// Draw a tile map
+		/// </summary>
 		void DrawTileMap(TileMap tileMap, Transform tf = Transform::Identity());
 #ifdef DrawText
 #undef DrawText
 #endif
+		/// <summary>
+		/// Draw text to the screen.
+		/// </summary>
 		void DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions = TEXT_CLIPPING::NO_CLIP, Transform tf = Transform::Identity());
 
-		// zoom
+		/// <summary>
+		/// Set the camera zoom to fit the specified width in pixels on the screen. 
+		/// Does not account for camera rotation.
+		/// </summary>
 		void ZoomToWidth(float width);
+		/// <summary>
+		/// Set the camera zoom to fit the specified height in pixels on the screen. 
+		/// Does not account for camera rotation.
+		/// </summary>
 		void ZoomToHeight(float height);
+		/// <summary>
+		/// Set the camera zoom to fit within the specified size in pixels on the screen.
+		/// Does not account for camera rotation.
+		/// </summary>
 		void ZoomToFit(Size2F size);
+		/// <summary>
+		/// Set the camera zoom to fill the specified size in pixels on the screen.
+		/// Does not account for camera rotation.
+		/// </summary>
 		void ZoomToFill(Size2F size);
 
-		// screen to world conversion
+		/// <summary>
+		/// Get the world coordinates of the specified window coordinates.
+		/// </summary>
 		Point2F ScreenToWorld(Point2D point);
+		/// <summary>
+		/// Get the window coordinates of the specified world coordinates.
+		/// </summary>
 		Point2D WorldToScreen(Point2F point);
 
-		// read only
+		/// <summary>
+		/// Returns a rectangle specifying the viewport of the camera. 
+		/// If the camera is rotated, the rectangle is the minimum size required to fit all of the view in frame.
+		/// </summary>
 		RectF GetRect();
+		/// <summary>
+		/// Returns the width and height of the viewport of the camera.
+		/// If the camera is rotated, returns the width and height of the rectangle required to fit all of the view in frame.
+		/// </summary>
 		Size2F GetSize();
 
 	private:
-		ID2D1HwndRenderTarget** ppRT = nullptr;
-		ID2D1Layer* pLayer = nullptr;
-		ID2D1Layer** ppCurrentLayer = nullptr;
-		D2D1_LAYER_PARAMETERS layerParams = D2D1::LayerParameters(); // for future geomety masks
-		CAMERA_REFERENCE refPoint;
+		ID2D1HwndRenderTarget** _ppRT = nullptr;
+		ID2D1Layer* _pLayer = nullptr;
+		ID2D1Layer** _ppCurrentLayer = nullptr;
+		D2D1_LAYER_PARAMETERS _layerParams = D2D1::LayerParameters(); // for future geomety masks
+		CAMERA_REFERENCE _refPoint;
 
-		void SafePushLayer();
+		/// <summary>
+		/// Helper function to manage render target layers and transformations
+		/// </summary>
+		void _SafePushLayer();
 
 		friend class _ResourceManager;
 		friend class Window;
@@ -264,7 +346,7 @@ namespace oppo {
 	public:
 		AnimationID id = 0;
 		int size = 0;
-		int i = 0;
+		int iFrame = 0;
 		int loop = 0;
 		bool isPaused = false;
 		virtual void NextFrame() {}
@@ -278,7 +360,7 @@ namespace oppo {
 		T* source;
 		std::vector<T> values;
 		void NextFrame() {
-			*source = values[i++];
+			*source = values[iFrame++];
 		}
 	};
 
@@ -292,10 +374,10 @@ namespace oppo {
 			a->size = values.size();
 			a->callback = callback;
 			a->loop = loop;
-			AnimationID id = nextID++;
-			if (id == 0) id = nextID++; // in case 18 quintillion animations have been used
+			AnimationID id = _nextID++;
+			if (id == 0) id = _nextID++; // in case 18 quintillion animations have been used
 			a->id = id;
-			animations.push_back(std::move(a));
+			_animations.push_back(std::move(a));
 			return id;
 		}
 
@@ -306,10 +388,10 @@ namespace oppo {
 		bool AnimationExists(AnimationID id);
 
 	private:
-		std::vector<std::unique_ptr<_AnimationBase>> animations;
-		unsigned long long nextID = 1;
+		std::vector<std::unique_ptr<_AnimationBase>> _animations;
+		unsigned long long _nextID = 1;
 
-		void NextFrame();
+		void _NextFrame();
 
 		friend class _WindowManager;
 		friend class Window;
@@ -419,7 +501,7 @@ namespace oppo {
 		// animations
 		template <typename T>
 		AnimationID AddAnimation(T* source, std::initializer_list<T> values, int loop, std::function<void()> callback) {
-			return animationManager.AddAnimation(source, values, loop, callback);
+			return _animationManager.AddAnimation(source, values, loop, callback);
 		}
 		Result RemoveAnimation(AnimationID& id);
 		Result PauseAnimation(AnimationID id);
@@ -446,36 +528,36 @@ namespace oppo {
 		Point2D GetPosition();
 
 	private:
-		_ResourceManager resourceManager;
-		_AnimationManager animationManager;
+		_ResourceManager _resourceManager;
+		_AnimationManager _animationManager;
 
-		HWND hWnd;
+		HWND _hWnd;
 
 		// fullscreen
-		WINDOWPLACEMENT wpPrev = { sizeof(wpPrev) };
-		DWORD dwStylePrev;
-		bool isFullscreen = false;
+		WINDOWPLACEMENT _wpPrev = { sizeof(_wpPrev) };
+		DWORD _dwStylePrev;
+		bool _isFullscreen = false;
 
-		ID2D1HwndRenderTarget** ppRT;
-		ID2D1Layer** ppCurrentLayer;
-		TRACKMOUSEEVENT tme;
-		wchar_t className[17];
-		Color backgroundColor;
-		Size2D szMin; // Minimum screen size, 0 for no min
-		Size2D szMax; // Maximum screen size, 0 for no max
-		float aspectRatio = 0; // fixed aspect ratio, 0 for unfixed
-		float fps = OP_DEFAULTFPS;
-		float ups = OP_DEFAULTUPS;
-		int winID = 0;
+		ID2D1HwndRenderTarget** _ppRT;
+		ID2D1Layer** _ppCurrentLayer;
+		TRACKMOUSEEVENT _tme;
+		wchar_t _className[17];
+		Color _backgroundColor;
+		Size2D _szMin; // Minimum screen size, 0 for no min
+		Size2D _szMax; // Maximum screen size, 0 for no max
+		float _aspectRatio = 0; // fixed aspect ratio, 0 for unfixed
+		float _fps = OP_DEFAULTFPS;
+		float _ups = OP_DEFAULTUPS;
+		int _winID = 0;
 
 
-		Stopwatch<std::chrono::microseconds> swRender; // controls framerate
-		Stopwatch<std::chrono::microseconds> swUpdate; // controls update messages
-		Stopwatch<std::chrono::microseconds> swAnimate; // controls animation frames
-		unsigned long long renderCountTarget = -1;
-		unsigned long long updateCountTarget = -1;
-		unsigned long long animateCountTarget = -1;
-		std::thread tGameLoopTimer;
+		Stopwatch<std::chrono::microseconds> _swRender; // controls framerate
+		Stopwatch<std::chrono::microseconds> _swUpdate; // controls update messages
+		Stopwatch<std::chrono::microseconds> _swAnimate; // controls animation frames
+		unsigned long long _renderCountTarget = -1;
+		unsigned long long _updateCountTarget = -1;
+		unsigned long long _animateCountTarget = -1;
+		std::thread _tGameLoopTimer;
 
 		enum class WNDSTATE {
 			NONE,
@@ -484,14 +566,12 @@ namespace oppo {
 			DESTROY
 		};
 
-		WNDSTATE wndState = WNDSTATE::NONE;
-		void SetWndStateCreate() {
-			wndState = WNDSTATE::CREATE;
-		}
+		WNDSTATE _wndState = WNDSTATE::NONE;
 
-		std::function<Result(Event)> GameLoop = nullptr;
+		std::function<Result(Event)> _GameLoop = nullptr;
 
 		void NewClassName();
+		HWND Create(WindowProperties properties);
 		void GameLoopTimer();
 		KEYS TranslateKeystroke(int vkCode);
 		LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -503,15 +583,16 @@ namespace oppo {
 	class _Engine {
 	public:
 		_Engine(const _Engine& obj) = delete;
-		static Result AddWindow(Window* wnd, WindowProperties properties);
-		static void RemoveWindow(Window* wnd);
-		static void Terminate();
+		Result AddWindow(Window* wnd, WindowProperties properties);
+		void RemoveWindow(Window* wnd);
+		void Terminate();
 
-		static void Run();
-
+		void Run();
+		static _Engine* GetInstance();
 	private:
-		static std::vector<HWND> windows;
-		_Engine();
+		static _Engine* _pInstance;
+		std::vector<HWND> _windows;
+		_Engine() {};
 	};
 
 	Result CreateWindow(Window* wnd, WindowProperties properties);

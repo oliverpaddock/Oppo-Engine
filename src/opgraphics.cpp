@@ -15,49 +15,49 @@ std::wstring oppo::utility::StringToWString(const std::string& str)
 #pragma region Window::public
 // create window-dependent resources
 oppo::Result oppo::Window::CreateBrush(Brush* pBrush, BrushProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateBrush(pBrush, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateBrush(pBrush, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateBitmap(Bitmap* pBitmap, BitmapProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateBitmap(pBitmap, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateBitmap(pBitmap, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateSpriteSheet(SpriteSheet* pSpriteSheet, SpriteSheetProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateSpriteSheet(pSpriteSheet, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateSpriteSheet(pSpriteSheet, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateSprite(Sprite* pSprite, SpriteProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateSprite(pSprite, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateSprite(pSprite, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateTextFormat(TextFormat* pTextFormat, TextFormatProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateTextFormat(pTextFormat , properties))) {
+	if (SUCCEEDED(_resourceManager.CreateTextFormat(pTextFormat , properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateTileMap(TileMap* pTileMap, TileMapProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateTileMap(pTileMap, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateTileMap(pTileMap, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateEffect(Effect* pEffect, EffectProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateEffect(pEffect, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateEffect(pEffect, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
 }
 oppo::Result oppo::Window::CreateCamera(Camera* pCamera, CameraProperties properties) {
-	if (SUCCEEDED(resourceManager.CreateCamera(pCamera, properties))) {
+	if (SUCCEEDED(_resourceManager.CreateCamera(pCamera, properties))) {
 		return ERRORS::SUCCESS;
 	}
 	return ERRORS::FAIL;
@@ -65,78 +65,80 @@ oppo::Result oppo::Window::CreateCamera(Camera* pCamera, CameraProperties proper
 
 // destroy window-dependent resources
 void oppo::Window::DestroyBrush(Brush* pBrush) {
-	resourceManager.DestroyBrush(pBrush);
+	_resourceManager.DestroyBrush(pBrush);
 }
 void oppo::Window::DestroyBitmap(Bitmap* pBitmap) {
-	resourceManager.DestroyBitmap(pBitmap);
+	_resourceManager.DestroyBitmap(pBitmap);
 }
 void oppo::Window::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
-	resourceManager.DestroySpriteSheet(pSpriteSheet);
+	_resourceManager.DestroySpriteSheet(pSpriteSheet);
 }
 void oppo::Window::DestroySprite(Sprite* pSprite) {
-	resourceManager.DestroySprite(pSprite);
+	_resourceManager.DestroySprite(pSprite);
 }
 void oppo::Window::DestroyTextFormat(TextFormat* pTextFormat) { 
-	resourceManager.DestroyTextFormat(pTextFormat);
+	_resourceManager.DestroyTextFormat(pTextFormat);
 }
 void oppo::Window::DestroyTileMap(TileMap* pTileMap) {}
 void oppo::Window::DestroyEffect(Effect* pEffect) {}
-void oppo::Window::DestroyCamera(Camera* pCamera) {}
+void oppo::Window::DestroyCamera(Camera* pCamera) {
+	_resourceManager.DestroyCamera(pCamera);
+}
 
 // animations
 oppo::Result oppo::Window::RemoveAnimation(AnimationID& id) {
-	return animationManager.RemoveAnimation(id);
+	return _animationManager.RemoveAnimation(id);
 }
 oppo::Result oppo::Window::PauseAnimation(AnimationID id) {
-	return animationManager.PauseAnimation(id);
+	return _animationManager.PauseAnimation(id);
 }
 oppo::Result oppo::Window::ResumeAnimation(AnimationID id) {
-	return animationManager.ResumeAnimation(id);
+	return _animationManager.ResumeAnimation(id);
 }
 oppo::Result oppo::Window::ResetAnimation(AnimationID id) {
-	return animationManager.ResetAnimation(id);
+	return _animationManager.ResetAnimation(id);
 }
 bool oppo::Window::AnimationExists(AnimationID id) {
-	return animationManager.AnimationExists(id);
+	return _animationManager.AnimationExists(id);
 }
 
 // set window properties
 void oppo::Window::SetFPS(float fps) {
 	if (fps == 0) {
-		renderCountTarget = -1; // avoid divide by zero error
+		_renderCountTarget = -1; // avoid divide by zero error
 	}
 	else {
-		renderCountTarget = (int)(1000000 / fps); // game loop timers are in microseconds
+		_renderCountTarget = (int)(1000000 / fps); // game loop timers are in microseconds
 	}
 }
 void oppo::Window::SetUPS(float ups) {
 	if (ups == 0) {
-		updateCountTarget = -1; // avoid divide by zero error
+		_updateCountTarget = -1; // avoid divide by zero error
 	}
 	else {
-		updateCountTarget = (int)(1000000 / ups); // game loop timers are in microseconds
+		_updateCountTarget = (int)(1000000 / ups); // game loop timers are in microseconds
 	}
 }
 void oppo::Window::SetAPS(float aps) {
 	if (aps == 0) {
-		animateCountTarget = -1; // avoid divide by zero error
+		_animateCountTarget = -1; // avoid divide by zero error
 	}
 	else {
-		animateCountTarget = (int)(1000000 / aps); // game loop timers are in microseconds
+		_animateCountTarget = (int)(1000000 / aps); // game loop timers are in microseconds
 	}
 }
 void oppo::Window::SetSize(Size2D size) {
-	SetWindowPos(hWnd, HWND_TOPMOST, NULL, NULL, size.width, size.height, SWP_NOMOVE);
+	SetWindowPos(_hWnd, HWND_TOPMOST, NULL, NULL, size.width, size.height, SWP_NOMOVE);
 }
 void oppo::Window::SetPosition(Point2D position) {
-	SetWindowPos(hWnd, HWND_TOPMOST, position.x, position.y, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(_hWnd, HWND_TOPMOST, position.x, position.y, NULL, NULL, SWP_NOSIZE);
 }
 void oppo::Window::SetMousePosition(Point2D position) {
 	SetCursorPos(position.x, position.y);
 }
 void oppo::Window::SetMouseCapture(bool isCaptured) {
 	if (isCaptured) {
-		SetCapture(hWnd);
+		SetCapture(_hWnd);
 	}
 	else {
 		ReleaseCapture();
@@ -144,65 +146,65 @@ void oppo::Window::SetMouseCapture(bool isCaptured) {
 }
 void oppo::Window::SetMaximize(bool isMaximized) {
 	if (isMaximized) {
-		PostMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+		PostMessage(_hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
 	}
 	else {
-		PostMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+		PostMessage(_hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
 	}
 }
 void oppo::Window::SetMinimize(bool isMinimized) {
 	if (isMinimized) {
-		PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+		PostMessage(_hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
 	}
 	else {
-		PostMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+		PostMessage(_hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
 	}
 }
 void oppo::Window::SetFullscreen(bool isFullscreen) {
-	if (isFullscreen && !this->isFullscreen) {
-		dwStylePrev = GetWindowLong(hWnd, GWL_STYLE);
-		this->isFullscreen = true;
+	if (isFullscreen && !this->_isFullscreen) {
+		_dwStylePrev = GetWindowLong(_hWnd, GWL_STYLE);
+		this->_isFullscreen = true;
 		MONITORINFO mi = { sizeof(mi) };
-		if (GetWindowPlacement(hWnd, &wpPrev) && GetMonitorInfo(MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST), &mi)) {
-			SetWindowLong(hWnd, GWL_STYLE, dwStylePrev & ~(WS_CAPTION | WS_THICKFRAME));
-			SetWindowPos(hWnd, HWND_TOP,
+		if (GetWindowPlacement(_hWnd, &_wpPrev) && GetMonitorInfo(MonitorFromWindow(_hWnd, MONITOR_DEFAULTTONEAREST), &mi)) {
+			SetWindowLong(_hWnd, GWL_STYLE, _dwStylePrev & ~(WS_CAPTION | WS_THICKFRAME));
+			SetWindowPos(_hWnd, HWND_TOP,
 				mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
 				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 		}
 	}
-	else if (!isFullscreen && this->isFullscreen) {
-		this->isFullscreen = false;
-		SetWindowLong(hWnd, GWL_STYLE, dwStylePrev);
-		SetWindowPlacement(hWnd, &wpPrev);
-		SetWindowPos(hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	else if (!isFullscreen && this->_isFullscreen) {
+		this->_isFullscreen = false;
+		SetWindowLong(_hWnd, GWL_STYLE, _dwStylePrev);
+		SetWindowPlacement(_hWnd, &_wpPrev);
+		SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
 }
 
 void oppo::Window::SetScene(std::function<Result(Event)> newScene) {
 	Event e;
-	e.windowID = winID;
+	e.windowID = _winID;
 
-	if (GameLoop) {
+	if (_GameLoop) {
 		e.type = EVENTS::ENDSCENE;
-		GameLoop(e);
+		_GameLoop(e);
 	}
 
 	if (newScene) {
-		GameLoop = newScene;
+		_GameLoop = newScene;
 		e.type = EVENTS::SETSCENE;
-		GameLoop(e);
+		_GameLoop(e);
 	}
 }
 
 // get window properties
 oppo::Size2D oppo::Window::GetSize() {
 	RECT rc;
-	GetWindowRect(hWnd, &rc);
+	GetWindowRect(_hWnd, &rc);
 	return Size2D(rc.right - rc.left, rc.bottom - rc.top);
 }
 oppo::Point2D oppo::Window::GetPosition() {
 	RECT rc;
-	GetWindowRect(hWnd, &rc);
+	GetWindowRect(_hWnd, &rc);
 	return Point2D(rc.left, rc.top);
 }
 #pragma endregion
@@ -212,40 +214,101 @@ void oppo::Window::NewClassName() {
 	std::mt19937 rng(static_cast<unsigned int>(std::time(nullptr)));
 	std::uniform_int_distribution<int> distribution(0x0041, 0x007A);
 	for (int i = 0; i < 8; i++) {
-		className[i] = L'A';
+		_className[i] = L'A';
 	}
 	for (int i = 8; i < 16; i++) {
-		className[i] = static_cast<wchar_t>(distribution(rng));
+		_className[i] = static_cast<wchar_t>(distribution(rng));
 	}
-	className[16] = L'\0';
+	_className[16] = L'\0';
+}
+HWND oppo::Window::Create(WindowProperties properties) {
+	// create a new random class name
+	NewClassName();
+
+	// set win32 window class properties
+	WNDCLASS wc = { };
+	wc.style = CS_DBLCLKS;
+	wc.lpfnWndProc = [](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT {
+		Window* pThis = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		if (uMsg == WM_NCCREATE) {
+			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+			pThis = static_cast<Window*>(pCreate->lpCreateParams);
+			SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+		}
+
+		if (pThis) {
+			return pThis->WindowProc(hwnd, uMsg, wParam, lParam);
+		}
+
+		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+	};
+
+	wc.hInstance = GetModuleHandle(NULL);
+	wc.lpszClassName = _className;
+
+	RegisterClass(&wc);
+
+	// window size and position defaults
+	if (properties.size.width == 0) properties.size.width = CW_USEDEFAULT;
+	if (properties.size.height == 0) properties.size.height = CW_USEDEFAULT;
+
+	// create window
+	_GameLoop = properties.GameLoop;
+	_wndState = WNDSTATE::CREATE;
+
+	_hWnd = CreateWindowEx(
+		0,
+		_className,
+		utility::StringToWString(properties.name).c_str(),
+		properties.style,
+		// Size and position: X, Y, Width, Height
+		CW_USEDEFAULT, CW_USEDEFAULT, properties.size.width, properties.size.height,
+		NULL,       // Parent window    
+		NULL,       // Menu
+		GetModuleHandle(NULL),  // Instance handle
+		this        // Additional application data
+	);
+
+	if (_hWnd != NULL) {
+		_backgroundColor = properties.backgroundColor;
+		_szMin = properties.minSize;
+		_szMax = properties.maxSize;
+		SetFPS(properties.fps);
+		SetUPS(properties.ups);
+		SetAPS(properties.aps);
+		_winID = properties.id;
+		_tGameLoopTimer = std::thread([this]() { GameLoopTimer(); });
+	}
+
+	return _hWnd;
 }
 void oppo::Window::GameLoopTimer() {
 	long long renderCount;
 	long long updateCount;
 	long long animateCount;
-	swRender.Reset();
-	swUpdate.Reset();
-	swAnimate.Reset();
+	_swRender.Reset();
+	_swUpdate.Reset();
+	_swAnimate.Reset();
 
-	while (wndState != WNDSTATE::DESTROY) {
-		renderCount = swRender.Elapsed().count();
-		updateCount = swUpdate.Elapsed().count();
-		animateCount = swAnimate.Elapsed().count();
+	while (_wndState != WNDSTATE::DESTROY) {
+		renderCount = _swRender.Elapsed().count();
+		updateCount = _swUpdate.Elapsed().count();
+		animateCount = _swAnimate.Elapsed().count();
 
-		if (animateCount >= animateCountTarget && wndState == WNDSTATE::RUN) {
-			swAnimate.Reset();
-			PostMessage(hWnd, WM_FRAME, animateCount, 2);
+		if (animateCount >= _animateCountTarget && _wndState == WNDSTATE::RUN) {
+			_swAnimate.Reset();
+			PostMessage(_hWnd, WM_FRAME, animateCount, 2);
 		}
 
-		if (renderCount >= renderCountTarget && wndState == WNDSTATE::RUN) {
-			swRender.Reset();
-			PostMessage(hWnd, WM_FRAME, renderCount, 1);
-			InvalidateRect(hWnd, NULL, FALSE);
+		if (renderCount >= _renderCountTarget && _wndState == WNDSTATE::RUN) {
+			_swRender.Reset();
+			PostMessage(_hWnd, WM_FRAME, renderCount, 1);
+			InvalidateRect(_hWnd, NULL, FALSE);
 		}
 
-		if (updateCount >= updateCountTarget && wndState == WNDSTATE::RUN) {
-			swUpdate.Reset();
-			PostMessage(hWnd, WM_FRAME, updateCount, 0);
+		if (updateCount >= _updateCountTarget && _wndState == WNDSTATE::RUN) {
+			_swUpdate.Reset();
+			PostMessage(_hWnd, WM_FRAME, updateCount, 0);
 		}
 
 	}
@@ -356,29 +419,29 @@ oppo::KEYS oppo::Window::TranslateKeystroke(int vkCode) {
 }
 LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	Event e;
-	e.windowID = winID;
+	e.windowID = _winID;
 	switch (uMsg) {
 	case WM_CREATE: {
-		resourceManager.Init(this);
-		if (FAILED(resourceManager.CreateWindowResources(hWnd))) {
+		_resourceManager.Init(this);
+		if (FAILED(_resourceManager.CreateWindowResources(hWnd))) {
 			return -1;
 		}
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::CREATE;
-			GameLoop(e);
+			_GameLoop(e);
 			e.type = EVENTS::SETSCENE;
-			GameLoop(e);
+			_GameLoop(e);
 		}
 		// set initial fullscreen parameters
-		GetWindowPlacement(hWnd, &wpPrev);
-		dwStylePrev = GetWindowLong(hWnd, GWL_STYLE);
-		wndState = WNDSTATE::RUN;
+		GetWindowPlacement(hWnd, &_wpPrev);
+		_dwStylePrev = GetWindowLong(hWnd, GWL_STYLE);
+		_wndState = WNDSTATE::RUN;
 		return 0;
 	}
 	case WM_CLOSE: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::CLOSE;
-			Result r = GameLoop(e);
+			Result r = _GameLoop(e);
 			if (Succeeded(r)) {
 				DestroyWindow(hWnd);
 			}
@@ -389,51 +452,51 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		return 0;
 	}
 	case WM_DESTROY: {
-		wndState = WNDSTATE::DESTROY;
-		if (GameLoop) {
+		_wndState = WNDSTATE::DESTROY;
+		if (_GameLoop) {
 			e.type = EVENTS::ENDSCENE;
-			GameLoop(e);
+			_GameLoop(e);
 			e.type = EVENTS::DESTROY;
-			GameLoop(e);
+			_GameLoop(e);
 		}
-		resourceManager.DestroyWindowResources();
-		_Engine::RemoveWindow(this);
+		_resourceManager.DestroyWindowResources();
+		_Engine::GetInstance()->RemoveWindow(this);
 		return 0;
 	}
 	case WM_SIZE: {
-		(*ppRT)->Resize(D2D1::SizeU(LOWORD(lParam), HIWORD(lParam)));
+		(*_ppRT)->Resize(D2D1::SizeU(LOWORD(lParam), HIWORD(lParam)));
 		InvalidateRect(hWnd, NULL, FALSE);
 		return 0;
 	}
 	case WM_SIZING: {
-		if (aspectRatio != 0) {
+		if (_aspectRatio != 0) {
 			RECT* rc;
 			rc = (RECT*)lParam;
 			if (wParam != WMSZ_LEFT && wParam != WMSZ_TOPLEFT && wParam != WMSZ_BOTTOMLEFT && wParam != WMSZ_RIGHT) {
-				rc->right = (rc->bottom - rc->top) * aspectRatio + rc->left;
+				rc->right = (rc->bottom - rc->top) * _aspectRatio + rc->left;
 			}
 			else if (wParam == WMSZ_LEFT || wParam == WMSZ_RIGHT) {
-				rc->bottom = (rc->right - rc->left) * 1 / aspectRatio + rc->top;
+				rc->bottom = (rc->right - rc->left) * 1 / _aspectRatio + rc->top;
 			}
 			else {
-				rc->left = rc->right - (rc->bottom - rc->top) * aspectRatio;
+				rc->left = rc->right - (rc->bottom - rc->top) * _aspectRatio;
 			}
 		}
 		return TRUE;
 	}
 	case WM_GETMINMAXINFO: {
 		LPMINMAXINFO lpMMI = (LPMINMAXINFO)(lParam);
-		if (szMin.width) {
-			lpMMI->ptMinTrackSize.x = szMin.width;
+		if (_szMin.width) {
+			lpMMI->ptMinTrackSize.x = _szMin.width;
 		}
-		if (szMin.height) {
-			lpMMI->ptMinTrackSize.y = szMin.height;
+		if (_szMin.height) {
+			lpMMI->ptMinTrackSize.y = _szMin.height;
 		}
-		if (szMax.width) {
-			lpMMI->ptMaxTrackSize.x = szMax.width;
+		if (_szMax.width) {
+			lpMMI->ptMaxTrackSize.x = _szMax.width;
 		}
-		if (szMax.height) {
-			lpMMI->ptMaxTrackSize.y = szMax.height;
+		if (_szMax.height) {
+			lpMMI->ptMaxTrackSize.y = _szMax.height;
 		}
 		return 0;
 	}
@@ -443,37 +506,37 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		GetClientRect(hWnd, &rc);
 		ValidateRect(hWnd, &rc);
 
-		(*ppRT)->BeginDraw();
-		(*ppRT)->SetTransform(D2D1::IdentityMatrix());
-		(*ppRT)->Clear(D2D1::ColorF(backgroundColor.R, backgroundColor.G, backgroundColor.B, backgroundColor.a));
+		(*_ppRT)->BeginDraw();
+		(*_ppRT)->SetTransform(D2D1::IdentityMatrix());
+		(*_ppRT)->Clear(D2D1::ColorF(_backgroundColor.R, _backgroundColor.G, _backgroundColor.B, _backgroundColor.a));
 
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::PAINT;
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
-		if (*ppCurrentLayer != nullptr) {
-			(*ppRT)->PopLayer();
-			*ppCurrentLayer = nullptr;
+		if (*_ppCurrentLayer != nullptr) {
+			(*_ppRT)->PopLayer();
+			*_ppCurrentLayer = nullptr;
 		}
 
-		HRESULT hr = (*ppRT)->EndDraw();
+		HRESULT hr = (*_ppRT)->EndDraw();
 
 		if (hr == D2DERR_RECREATE_TARGET) {
-			resourceManager.RecreateDDResources(hWnd);
+			_resourceManager.RecreateDDResources(hWnd);
 			InvalidateRect(hWnd, NULL, FALSE);
 		}
 
 		return 0;
 	}
 	case WM_FRAME: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			long long usCount = (long long)(wParam);
 			if (lParam == 0) {
 				// update
 				e.as.update.dt = usCount / 1000000.;
 				e.type = EVENTS::UPDATE;
-				GameLoop(e);
+				_GameLoop(e);
 			}
 			else if (lParam == 1) {
 				// render
@@ -481,7 +544,7 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			}
 			else if (lParam == 2) {
 				// animate
-				animationManager.NextFrame();
+				_animationManager._NextFrame();
 			}
 		}
 
@@ -494,10 +557,10 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		WORD keyFlags = HIWORD(lParam);
 		BOOL wasKeyDown = (keyFlags & KF_REPEAT) == KF_REPEAT;
 
-		if (GameLoop && !wasKeyDown) {
+		if (_GameLoop && !wasKeyDown) {
 			e.type = EVENTS::KEYDOWN;
 			e.as.keyDown.key = TranslateKeystroke(vkCode);
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
@@ -505,20 +568,20 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	case WM_KEYUP: {
 		WORD vkCode = LOWORD(wParam);
 
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::KEYUP;
 			e.as.keyUp.key = TranslateKeystroke(vkCode);
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_CHAR: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::CHAR;
 			e.as.character.character = static_cast<char>(wParam);
 			e.as.character.repeat = LOWORD(lParam);
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
@@ -529,11 +592,11 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		WORD keyFlags = HIWORD(lParam);
 		BOOL wasKeyDown = (keyFlags & KF_REPEAT) == KF_REPEAT;
 
-		if (GameLoop && !wasKeyDown) {
+		if (_GameLoop && !wasKeyDown) {
 			e.type = EVENTS::KEYDOWN;
 			e.as.keyDown.key = TranslateKeystroke(vkCode);
 			e.as.keyDown.alt = true;
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
@@ -541,22 +604,22 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 	case WM_SYSKEYUP: {
 		WORD vkCode = LOWORD(wParam);
 
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::KEYUP;
 			e.as.keyUp.key = TranslateKeystroke(vkCode);
 			e.as.keyUp.alt = true;
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_SYSCHAR: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::CHAR;
 			e.as.character.character = static_cast<char>(wParam);
 			e.as.character.repeat = LOWORD(lParam);
 			e.as.character.alt = 1;
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
@@ -564,19 +627,19 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 				   // mouse
 	case WM_MOUSEMOVE: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEMOVE;
 			e.as.mouseMove.x = GET_X_LPARAM(lParam);
 			e.as.mouseMove.y = GET_Y_LPARAM(lParam);
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseMove.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 		return 0;
 	}
 	case WM_MOUSEWHEEL: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSESCROLL;
 			e.as.mouseScroll.vScroll = GET_WHEEL_DELTA_WPARAM(wParam);
 			e.as.mouseScroll.x = GET_X_LPARAM(lParam);
@@ -584,12 +647,12 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseScroll.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 		return 0;
 	}
 	case WM_MOUSEHWHEEL: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSESCROLL;
 			e.as.mouseScroll.hScroll = GET_WHEEL_DELTA_WPARAM(wParam);
 			e.as.mouseScroll.x = GET_X_LPARAM(lParam);
@@ -597,12 +660,12 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseScroll.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 		return 0;
 	}
 	case WM_LBUTTONDOWN: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseDown.x = GET_X_LPARAM(lParam);
 			e.as.mouseDown.y = GET_Y_LPARAM(lParam);
@@ -610,13 +673,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDown.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_LBUTTONUP: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseUp.x = GET_X_LPARAM(lParam);
 			e.as.mouseUp.y = GET_Y_LPARAM(lParam);
@@ -624,13 +687,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseUp.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_LBUTTONDBLCLK: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDBLCLK;
 			e.as.mouseDblClk.x = GET_X_LPARAM(lParam);
 			e.as.mouseDblClk.y = GET_Y_LPARAM(lParam);
@@ -638,13 +701,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDblClk.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_RBUTTONDOWN: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseDown.x = GET_X_LPARAM(lParam);
 			e.as.mouseDown.y = GET_Y_LPARAM(lParam);
@@ -652,13 +715,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDown.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_RBUTTONUP: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseUp.x = GET_X_LPARAM(lParam);
 			e.as.mouseUp.y = GET_Y_LPARAM(lParam);
@@ -666,13 +729,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseUp.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_RBUTTONDBLCLK: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDBLCLK;
 			e.as.mouseDblClk.x = GET_X_LPARAM(lParam);
 			e.as.mouseDblClk.y = GET_Y_LPARAM(lParam);
@@ -680,13 +743,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDblClk.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_MBUTTONDOWN: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseDown.x = GET_X_LPARAM(lParam);
 			e.as.mouseDown.y = GET_Y_LPARAM(lParam);
@@ -694,13 +757,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDown.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_MBUTTONUP: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseUp.x = GET_X_LPARAM(lParam);
 			e.as.mouseUp.y = GET_Y_LPARAM(lParam);
@@ -708,13 +771,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseUp.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_MBUTTONDBLCLK: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDBLCLK;
 			e.as.mouseDblClk.x = GET_X_LPARAM(lParam);
 			e.as.mouseDblClk.y = GET_Y_LPARAM(lParam);
@@ -722,13 +785,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDblClk.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_XBUTTONDOWN: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDOWN;
 			e.as.mouseDown.x = GET_X_LPARAM(lParam);
 			e.as.mouseDown.y = GET_Y_LPARAM(lParam);
@@ -741,13 +804,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDown.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_XBUTTONUP: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEUP;
 			e.as.mouseUp.x = GET_X_LPARAM(lParam);
 			e.as.mouseUp.y = GET_Y_LPARAM(lParam);
@@ -760,13 +823,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseUp.alt = true;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
 	}
 	case WM_XBUTTONDBLCLK: {
-		if (GameLoop) {
+		if (_GameLoop) {
 			e.type = EVENTS::MOUSEDBLCLK;
 			e.as.mouseDblClk.x = GET_X_LPARAM(lParam);
 			e.as.mouseDblClk.y = GET_Y_LPARAM(lParam);
@@ -779,7 +842,7 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 			if (GetKeyState(VK_MENU) & 0x8000) {
 				e.as.mouseDblClk.alt = 1;
 			}
-			GameLoop(e);
+			_GameLoop(e);
 		}
 
 		return 0;
@@ -795,256 +858,253 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 
 #pragma region Brush
 void oppo::Brush::SetColor(Color color) {
-	this->color = color;
-	if (pBrush) {
-		pBrush->SetColor(D2D1::ColorF(color.R, color.G, color.B, color.a));
+	this->_color = color;
+	if (_pBrush) {
+		_pBrush->SetColor(D2D1::ColorF(color.R, color.G, color.B, color.a));
 	}
 }
 
 oppo::Color oppo::Brush::GetColor() {
-	return color;
+	return _color;
 }
 
 #pragma endregion
 
 #pragma region Sprite Sheet
-oppo::Size2D oppo::SpriteSheet::SheetResolution() {
-	return pxSheetResolution;
+
+oppo::Size2D oppo::SpriteSheet::GetSpriteSize() {
+	return _spriteSize;
 }
 
-oppo::Size2D oppo::SpriteSheet::SpriteResolution() {
-	return pxSpriteResolution;
+oppo::Size2D oppo::SpriteSheet::GetSpriteCount() {
+	return _spriteCount;
 }
 
-oppo::Size2D oppo::SpriteSheet::SpriteCount() {
-	return spriteCount;
-}
-
-oppo::Rect oppo::SpriteSheet::Padding() {
-	return padding;
+oppo::Rect oppo::SpriteSheet::GetPadding() {
+	return _padding;
 }
 
 D2D1_RECT_F oppo::SpriteSheet::GetSpriteRect(Size2D spriteIndex) {
 	return D2D1::RectF(
-		spriteIndex.width * (padding.left + padding.right + pxSpriteResolution.width) + padding.left,
-		spriteIndex.height * (padding.top + padding.bottom + pxSpriteResolution.height) + padding.top,
-		(spriteIndex.width + 1) * (padding.left + padding.right + pxSpriteResolution.width) - padding.right,
-		(spriteIndex.height + 1) * (padding.top + padding.bottom + pxSpriteResolution.height) - padding.bottom
+		spriteIndex.width * (_padding.left + _padding.right + _spriteSize.width) + _padding.left,
+		spriteIndex.height * (_padding.top + _padding.bottom + _spriteSize.height) + _padding.top,
+		(spriteIndex.width + 1) * (_padding.left + _padding.right + _spriteSize.width) - _padding.right,
+		(spriteIndex.height + 1) * (_padding.top + _padding.bottom + _spriteSize.height) - _padding.bottom
 		);
 }
 #pragma endregion
 
 #pragma region Camera
 void oppo::Camera::Fill(Color color) {
-	SafePushLayer();
-	(*ppRT)->Clear(D2D1::ColorF(color.R, color.G, color.B, color.a));
+	_SafePushLayer();
+	(*_ppRT)->Clear(D2D1::ColorF(color.R, color.G, color.B, color.a));
 }
 void oppo::Camera::Fill(Brush brush) {
-	SafePushLayer();
-	(*ppRT)->Clear(D2D1::ColorF(brush.color.R, brush.color.G, brush.color.B, brush.color.a));
+	_SafePushLayer();
+	(*_ppRT)->Clear(D2D1::ColorF(brush._color.R, brush._color.G, brush._color.B, brush._color.a));
 }
 void oppo::Camera::FillShape(Rect rect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	(*_ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush._pBrush);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::FillShape(RectF rect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush);
+	(*_ppRT)->FillRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush._pBrush);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::FillShape(RoundedRect roundedRect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush);
+	(*_ppRT)->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush._pBrush);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::FillShape(Ellipse ellipse, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->FillEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush);
+	(*_ppRT)->FillEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush._pBrush);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(Rect rect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
+	(*_ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush._pBrush, brush.strokeWidth);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(RectF rect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush.pBrush, brush.strokeWidth);
+	(*_ppRT)->DrawRectangle(D2D1::RectF(rect.left, rect.top, rect.right, rect.bottom), brush._pBrush, brush.strokeWidth);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(RoundedRect roundedRect, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush.pBrush, brush.strokeWidth);
+	(*_ppRT)->DrawRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(roundedRect.rect.left, roundedRect.rect.top, roundedRect.rect.right, roundedRect.rect.bottom), roundedRect.rx, roundedRect.ry), brush._pBrush, brush.strokeWidth);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(Ellipse ellipse, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush.pBrush, brush.strokeWidth);
+	(*_ppRT)->DrawEllipse(D2D1::Ellipse(D2D1::Point2F(ellipse.center.x, ellipse.center.y), ellipse.rx, ellipse.ry), brush._pBrush, brush.strokeWidth);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(Line line, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawLine(D2D1::Point2F(line.p0.x, line.p0.y), D2D1::Point2F(line.p1.x, line.p1.y), brush.pBrush, brush.strokeWidth);
+	(*_ppRT)->DrawLine(D2D1::Point2F(line.p0.x, line.p0.y), D2D1::Point2F(line.p1.x, line.p1.y), brush._pBrush, brush.strokeWidth);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawShape(Bezier bezier, Brush brush, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 }
 void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, RectF sourceRect, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, D2D1::RectF(sourceRect.left, sourceRect.top, sourceRect.right, sourceRect.bottom));
+	(*_ppRT)->DrawBitmap(bitmap._pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, D2D1::RectF(sourceRect.left, sourceRect.top, sourceRect.right, sourceRect.bottom));
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawBitmap(Bitmap bitmap, RectF destRect, float opacity, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawBitmap(bitmap.pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR);
+	(*_ppRT)->DrawBitmap(bitmap._pBitmap, D2D1::RectF(destRect.left, destRect.top, destRect.right, destRect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawSprite(Sprite sprite, float opacity, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawBitmap(sprite.pSpriteSheet->pBitmap, D2D1::RectF(sprite.rect.left, sprite.rect.top, sprite.rect.right, sprite.rect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite.pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
+	(*_ppRT)->DrawBitmap(sprite._pSpriteSheet->_pBitmap, D2D1::RectF(sprite.rect.left, sprite.rect.top, sprite.rect.right, sprite.rect.bottom), opacity, D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR, sprite._pSpriteSheet->GetSpriteRect(sprite.spriteIndex));
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 void oppo::Camera::DrawTileMap(TileMap tileMap, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 }
 void oppo::Camera::DrawText(const char* text, RectF textBox, TextFormat textFormat, Brush brush, TEXT_CLIPPING clipOptions, Transform tf) {
-	SafePushLayer();
+	_SafePushLayer();
 	bool isIdentity = tf.IsIdentity();
 	Transform cameraTF;
 	if (!isIdentity) {
-		(*ppRT)->GetTransform(&cameraTF);
-		(*ppRT)->SetTransform(tf * cameraTF);
+		(*_ppRT)->GetTransform(&cameraTF);
+		(*_ppRT)->SetTransform(tf * cameraTF);
 	}
-	(*ppRT)->DrawTextW(
+	(*_ppRT)->DrawTextW(
 		utility::StringToWString(text).c_str(),
 		strlen(text),
-		textFormat.pTextFormat,
+		textFormat._pTextFormat,
 		D2D1::RectF(textBox.left, textBox.top, textBox.right, textBox.bottom),
-		brush.pBrush,
+		brush._pBrush,
 		static_cast<D2D1_DRAW_TEXT_OPTIONS>(clipOptions)
 	);
 	if (!isIdentity) {
-		(*ppRT)->SetTransform(cameraTF);
+		(*_ppRT)->SetTransform(cameraTF);
 	}
 }
 
 void oppo::Camera::ZoomToWidth(float width) {
-	Size2F sz = (*ppRT)->GetSize();
+	Size2F sz = (*_ppRT)->GetSize();
 	float newScale = sz.width / width;
 	scale = Size2F(newScale, newScale);
 }
 void oppo::Camera::ZoomToHeight(float height) {
-	Size2F sz = (*ppRT)->GetSize();
+	Size2F sz = (*_ppRT)->GetSize();
 	float newScale = sz.height / height;
 	scale = Size2F(newScale, newScale);
 }
 void oppo::Camera::ZoomToFit(Size2F size) {
-	Size2F currentSize = (*ppRT)->GetSize();
+	Size2F currentSize = (*_ppRT)->GetSize();
 	float scaleX = currentSize.width / size.width;
 	float scaleY = currentSize.height / size.height;
 	float newScale = min(scaleX, scaleY);
 	scale = Size2F(newScale, newScale);
 }
 void oppo::Camera::ZoomToFill(Size2F size) {
-	Size2F currentSize = (*ppRT)->GetSize();
+	Size2F currentSize = (*_ppRT)->GetSize();
 	float scaleX = currentSize.width / size.width;
 	float scaleY = currentSize.height / size.height;
 	float newScale = max(scaleX, scaleY);
@@ -1052,17 +1112,17 @@ void oppo::Camera::ZoomToFill(Size2F size) {
 }
 
 oppo::Point2F oppo::Camera::ScreenToWorld(Point2D point) {
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	D2D1_SIZE_F sz = (*_ppRT)->GetSize();
 	D2D1_POINT_2F offset = D2D1::Point2F();
-	if (refPoint == CAMERA_REFERENCE::CENTER) {
+	if (_refPoint == CAMERA_REFERENCE::CENTER) {
 		offset.x = sz.width / 2;
 		offset.y = sz.height / 2;
 	}
 	else {
-		if (refPoint == CAMERA_REFERENCE::TOP_RIGHT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::TOP_RIGHT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.x = sz.width;
 		}
-		if (refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.y = sz.height;
 		}
 	}
@@ -1076,17 +1136,17 @@ oppo::Point2F oppo::Camera::ScreenToWorld(Point2D point) {
 	);
 }
 oppo::Point2D oppo::Camera::WorldToScreen(Point2F point) {
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	D2D1_SIZE_F sz = (*_ppRT)->GetSize();
 	D2D1_POINT_2F offset = D2D1::Point2F();
-	if (refPoint == CAMERA_REFERENCE::CENTER) {
+	if (_refPoint == CAMERA_REFERENCE::CENTER) {
 		offset.x = sz.width / 2;
 		offset.y = sz.height / 2;
 	}
 	else {
-		if (refPoint == CAMERA_REFERENCE::TOP_RIGHT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::TOP_RIGHT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.x = sz.width;
 		}
-		if (refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.y = sz.height;
 		}
 	}
@@ -1101,69 +1161,49 @@ oppo::Point2D oppo::Camera::WorldToScreen(Point2F point) {
 }
 
 oppo::RectF oppo::Camera::GetRect() {
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
-	sz.width /= scale.width;
-	sz.height /= scale.height;
+	Size2F sz = (*_ppRT)->GetSize();
+	Point2F topLeft = ScreenToWorld(Point2D(0, 0));
+	Point2F topRight = ScreenToWorld(Point2D(sz.width, 0));
+	Point2F bottomLeft = ScreenToWorld(Point2D(0, sz.height));
+	Point2F bottomRight = ScreenToWorld(Point2D(sz.width, sz.height));
 	RectF rc;
-	if (refPoint == CAMERA_REFERENCE::CENTER) {
-		rc.left = position.x - sz.width / 2;
-		rc.top = position.y - sz.height / 2;
-		rc.right = position.x + sz.width / 2;
-		rc.bottom = position.y + sz.height / 2;
-	}
-	else {
-		if (refPoint == CAMERA_REFERENCE::TOP_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_LEFT) {
-			rc.left = position.x;
-			rc.right = position.x + sz.width;
-		}
-		else {
-			rc.left = position.x - sz.width;
-			rc.right = position.x;
-		}
-		if (refPoint == CAMERA_REFERENCE::TOP_LEFT || refPoint == CAMERA_REFERENCE::TOP_RIGHT) {
-			rc.top = position.y;
-			rc.bottom = position.y + sz.height;
-		}
-		else {
-			rc.top = position.y - sz.height;
-			rc.bottom = position.y;
-		}
-	}
+	rc.left = min(topLeft.x, min(topRight.x, min(bottomLeft.x, bottomRight.x)));
+	rc.top = min(topLeft.y, min(topRight.y, min(bottomLeft.y, bottomRight.y)));
+	rc.right = max(topLeft.x, max(topRight.x, max(bottomLeft.x, bottomRight.x)));
+	rc.bottom = max(topLeft.y, max(topRight.y, max(bottomLeft.y, bottomRight.y)));
 	return rc;
 }
 oppo::Size2F oppo::Camera::GetSize() {
-	Size2F size = (*ppRT)->GetSize();
-	size.width /= scale.width;
-	size.height /= scale.height;
-	return size;
+	RectF rc = GetRect();
+	return Size2F(rc.right - rc.left, rc.bottom - rc.top);
 }
 
-void oppo::Camera::SafePushLayer() {
-	if (*ppCurrentLayer == pLayer) return;
-	if (*ppCurrentLayer != nullptr) {
-		(*ppRT)->PopLayer();
-		*ppCurrentLayer = nullptr;
+void oppo::Camera::_SafePushLayer() {
+	if (*_ppCurrentLayer == _pLayer) return;
+	if (*_ppCurrentLayer != nullptr) {
+		(*_ppRT)->PopLayer();
+		*_ppCurrentLayer = nullptr;
 	}
-	(*ppRT)->PushLayer(layerParams, pLayer);
-	*ppCurrentLayer = pLayer;
-	D2D1_SIZE_F sz = (*ppRT)->GetSize();
+	(*_ppRT)->PushLayer(_layerParams, _pLayer);
+	*_ppCurrentLayer = _pLayer;
+	D2D1_SIZE_F sz = (*_ppRT)->GetSize();
 	
 	
 	D2D1_POINT_2F offset = D2D1::Point2F();
-	if (refPoint == CAMERA_REFERENCE::CENTER) {
+	if (_refPoint == CAMERA_REFERENCE::CENTER) {
 		offset.x = sz.width / 2;
 		offset.y = sz.height / 2;
 	}
 	else {
-		if (refPoint == CAMERA_REFERENCE::TOP_RIGHT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::TOP_RIGHT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.x = sz.width;
 		}
-		if (refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
+		if (_refPoint == CAMERA_REFERENCE::BOTTOM_LEFT || _refPoint == CAMERA_REFERENCE::BOTTOM_RIGHT) {
 			offset.y = sz.height;
 		}
 	}
 	D2D1_MATRIX_3X2_F transform;
-	(*ppRT)->SetTransform(
+	(*_ppRT)->SetTransform(
 		D2D1::Matrix3x2F::Scale(D2D1::SizeF(scale.width, scale.height), D2D1::Point2F(position.x, position.y))
 		* D2D1::Matrix3x2F::Rotation(rotation, D2D1::Point2F(position.x, position.y)) 
 		* D2D1::Matrix3x2F::Translation(offset.x - position.x, offset.y - position.y)
@@ -1172,13 +1212,13 @@ void oppo::Camera::SafePushLayer() {
 #pragma endregion
 
 #pragma region Animation Manager
-void oppo::_AnimationManager::NextFrame() {
+void oppo::_AnimationManager::_NextFrame() {
 	std::vector<std::function<void()>> callbacks;
-	for (auto a = animations.begin(); a != animations.end();) {
+	for (auto a = _animations.begin(); a != _animations.end();) {
 		if (!(*a)->isPaused) {
 			(*a)->NextFrame();
-			if ((*a)->i == (*a)->size) {
-				(*a)->i = 0;
+			if ((*a)->iFrame == (*a)->size) {
+				(*a)->iFrame = 0;
 				if ((*a)->loop > 0) {
 					(*a)->loop--;
 				}
@@ -1186,7 +1226,7 @@ void oppo::_AnimationManager::NextFrame() {
 					if ((*a)->callback) {
 						callbacks.push_back((*a)->callback);
 					}
-					a = animations.erase(a);
+					a = _animations.erase(a);
 				}
 				else {
 					a++;
@@ -1209,9 +1249,9 @@ oppo::Result oppo::_AnimationManager::RemoveAnimation(AnimationID& id) {
 	if (!id) {
 		return oppo::ERRORS::FAIL;
 	}
-	for (auto a = animations.begin(); a != animations.end(); a++) {
+	for (auto a = _animations.begin(); a != _animations.end(); a++) {
 		if ((*a)->id == id) {
-			animations.erase(a);
+			_animations.erase(a);
 			id = 0;
 			return oppo::ERRORS::SUCCESS;
 		}
@@ -1222,7 +1262,7 @@ bool oppo::_AnimationManager::AnimationExists(AnimationID id) {
 	if (!id) {
 		return false;
 	}
-	for (auto a = animations.begin(); a != animations.end(); a++) {
+	for (auto a = _animations.begin(); a != _animations.end(); a++) {
 		if ((*a)->id == id) {
 			return true;
 		}
@@ -1233,7 +1273,7 @@ oppo::Result oppo::_AnimationManager::PauseAnimation(AnimationID id) {
 	if (!id) {
 		return oppo::ERRORS::FAIL;
 	}
-	for (auto a = animations.begin(); a != animations.end(); a++) {
+	for (auto a = _animations.begin(); a != _animations.end(); a++) {
 		if ((*a)->id == id) {
 			(*a)->isPaused = true;
 			return oppo::ERRORS::SUCCESS;
@@ -1245,7 +1285,7 @@ oppo::Result oppo::_AnimationManager::ResumeAnimation(AnimationID id) {
 	if (!id) {
 		return oppo::ERRORS::FAIL;
 	}
-	for (auto a = animations.begin(); a != animations.end(); a++) {
+	for (auto a = _animations.begin(); a != _animations.end(); a++) {
 		if ((*a)->id == id) {
 			(*a)->isPaused = false;
 			return oppo::ERRORS::SUCCESS;
@@ -1257,9 +1297,9 @@ oppo::Result oppo::_AnimationManager::ResetAnimation(AnimationID id) {
 	if (!id) {
 		return oppo::ERRORS::FAIL;
 	}
-	for (auto a = animations.begin(); a != animations.end(); a++) {
+	for (auto a = _animations.begin(); a != _animations.end(); a++) {
 		if ((*a)->id == id) {
-			(*a)->i = 0;
+			(*a)->iFrame = 0;
 			return oppo::ERRORS::SUCCESS;
 		}
 	}
@@ -1270,8 +1310,8 @@ oppo::Result oppo::_AnimationManager::ResetAnimation(AnimationID id) {
 
 #pragma region Resource Manager
 void oppo::_ResourceManager::Init(Window* wnd) {
-	wnd->ppRT = &pRT;
-	wnd->ppCurrentLayer = &currentLayer;
+	wnd->_ppRT = &pRT;
+	wnd->_ppCurrentLayer = &currentLayer;
 }
 
 HRESULT oppo::_ResourceManager::CreateWindowResources(HWND hWnd) {
@@ -1337,7 +1377,7 @@ HRESULT oppo::_ResourceManager::RecreateDDResources(HWND hWnd) {
 		for (auto pBrush : brushes) {
 			if (SUCCEEDED(hr)) { 
 				BrushProperties properties;
-				properties.color = pBrush->color;
+				properties.color = pBrush->_color;
 				properties.strokewidth = pBrush->strokeWidth;
 				hr = CreateBrush(pBrush, properties); 
 			}
@@ -1345,17 +1385,17 @@ HRESULT oppo::_ResourceManager::RecreateDDResources(HWND hWnd) {
 		for (auto pBitmap : bitmaps) {
 			if (SUCCEEDED(hr)) { 
 				BitmapProperties properties;
-				properties.fileName = pBitmap->fileName.c_str();
+				properties.fileName = pBitmap->_fileName.c_str();
 				hr = CreateBitmap(pBitmap, properties);
 			}
 		}
 		for (auto pSpriteSheet : spriteSheets) {
 			if (SUCCEEDED(hr)) { 
 				SpriteSheetProperties properties;
-				properties.fileName = pSpriteSheet->fileName.c_str();
-				properties.padding = pSpriteSheet->padding;
-				properties.spriteCount = pSpriteSheet->spriteCount;
-				properties.spriteSize = pSpriteSheet->pxSpriteResolution;
+				properties.fileName = pSpriteSheet->_fileName.c_str();
+				properties.padding = pSpriteSheet->_padding;
+				properties.spriteCount = pSpriteSheet->_spriteCount;
+				properties.spriteSize = pSpriteSheet->_spriteSize;
 				hr = CreateSpriteSheet(pSpriteSheet, properties); 
 			}
 		}
@@ -1372,7 +1412,7 @@ HRESULT oppo::_ResourceManager::RecreateDDResources(HWND hWnd) {
 
 void oppo::_ResourceManager::DestroyDIResources() {
 	for (auto textFormat : textFormats) {
-		utility::SafeRelease(&textFormat->pTextFormat);
+		utility::SafeRelease(&textFormat->_pTextFormat);
 	}
 	utility::SafeRelease(&pFactory);
 	utility::SafeRelease(&pFactoryWIC);
@@ -1398,7 +1438,7 @@ HRESULT oppo::_ResourceManager::CreateBrush(Brush* pBrush, BrushProperties prope
 	HRESULT hr = E_FAIL;
 	if (pRT) {
 		Color color = properties.color;
-		hr = pRT->CreateSolidColorBrush(D2D1::ColorF(color.R, color.G, color.B, color.a), &pBrush->pBrush);
+		hr = pRT->CreateSolidColorBrush(D2D1::ColorF(color.R, color.G, color.B, color.a), &pBrush->_pBrush);
 	}
 	if (SUCCEEDED(hr)) {
 		pBrush->strokeWidth = properties.strokewidth;
@@ -1413,9 +1453,9 @@ HRESULT oppo::_ResourceManager::CreateBitmap(Bitmap* pBitmap, BitmapProperties p
 	HRESULT hr = S_OK;
 
 	if (pRT) {
-		hr = LoadBitmapFromFile(properties.fileName, &pBitmap->pBitmap);
+		hr = LoadBitmapFromFile(properties.fileName, &pBitmap->_pBitmap);
 		if (SUCCEEDED(hr)) {
-			pBitmap->fileName = properties.fileName;
+			pBitmap->_fileName = properties.fileName;
 			if (std::find(bitmaps.begin(), bitmaps.end(), pBitmap) == bitmaps.end()) {
 				bitmaps.push_back(pBitmap);
 			}
@@ -1427,15 +1467,14 @@ HRESULT oppo::_ResourceManager::CreateBitmap(Bitmap* pBitmap, BitmapProperties p
 HRESULT oppo::_ResourceManager::CreateSpriteSheet(SpriteSheet* pSpriteSheet, SpriteSheetProperties properties) {
 	HRESULT hr = E_FAIL;
 	if (pRT) {
-		hr = LoadBitmapFromFile(properties.fileName, &pSpriteSheet->pBitmap);
+		hr = LoadBitmapFromFile(properties.fileName, &pSpriteSheet->_pBitmap);
 	}
 
 	if (SUCCEEDED(hr)) {
-		pSpriteSheet->fileName = properties.fileName;
-		pSpriteSheet->pxSheetResolution = pSpriteSheet->pBitmap->GetSize();
-		pSpriteSheet->pxSpriteResolution = properties.spriteSize;
-		pSpriteSheet->spriteCount = properties.spriteCount;
-		pSpriteSheet->padding = properties.padding;
+		pSpriteSheet->_fileName = properties.fileName;
+		pSpriteSheet->_spriteSize = properties.spriteSize;
+		pSpriteSheet->_spriteCount = properties.spriteCount;
+		pSpriteSheet->_padding = properties.padding;
 		if (std::find(spriteSheets.begin(), spriteSheets.end(), pSpriteSheet) == spriteSheets.end()) {
 			spriteSheets.push_back(pSpriteSheet);
 		}
@@ -1446,12 +1485,12 @@ HRESULT oppo::_ResourceManager::CreateSpriteSheet(SpriteSheet* pSpriteSheet, Spr
 HRESULT oppo::_ResourceManager::CreateSprite(Sprite* pSprite, SpriteProperties properties) {
 	HRESULT hr = E_FAIL;
 
-	if (properties.pSpriteSheet->pBitmap) {
+	if (properties.pSpriteSheet->_pBitmap) {
 		hr = S_OK;
 	}
 
 	if (SUCCEEDED(hr)) {
-		pSprite->pSpriteSheet = properties.pSpriteSheet;
+		pSprite->_pSpriteSheet = properties.pSpriteSheet;
 		pSprite->rect = properties.spriteRect;
 		pSprite->spriteIndex = properties.spriteIndex;
 	}
@@ -1473,25 +1512,25 @@ HRESULT oppo::_ResourceManager::CreateTextFormat(TextFormat* pTextFormat, TextFo
 			static_cast<DWRITE_FONT_STRETCH>(properties.fontStretch),
 			properties.fontSize,
 			L"en-us",
-			&pTextFormat->pTextFormat
+			&pTextFormat->_pTextFormat
 		);
 	}
 
 	if (SUCCEEDED(hr)) {
-		hr = pTextFormat->pTextFormat->SetTextAlignment(static_cast<DWRITE_TEXT_ALIGNMENT>(properties.hAlignment));
+		hr = pTextFormat->_pTextFormat->SetTextAlignment(static_cast<DWRITE_TEXT_ALIGNMENT>(properties.hAlignment));
 	}
 
 	if (SUCCEEDED(hr)) {
-		hr = pTextFormat->pTextFormat->SetParagraphAlignment(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(properties.vAlignment));
+		hr = pTextFormat->_pTextFormat->SetParagraphAlignment(static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(properties.vAlignment));
 	}
 
 	if (SUCCEEDED(hr)) {
-		hr = pTextFormat->pTextFormat->SetWordWrapping(static_cast<DWRITE_WORD_WRAPPING>(properties.wordWrapping));
+		hr = pTextFormat->_pTextFormat->SetWordWrapping(static_cast<DWRITE_WORD_WRAPPING>(properties.wordWrapping));
 	}
 
 	if (SUCCEEDED(hr)) {
 		float lineSpacing = properties.fontSize * (properties.lineSpacing);
-		hr = pTextFormat->pTextFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineSpacing, .8 * lineSpacing);
+		hr = pTextFormat->_pTextFormat->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, lineSpacing, .8 * lineSpacing);
 	}
 
 	return hr;
@@ -1506,12 +1545,12 @@ HRESULT oppo::_ResourceManager::CreateCamera(Camera* pCamera, CameraProperties p
 	HRESULT hr = E_FAIL;
 	
 	if (pRT) {
-		pCamera->ppRT = &pRT;
-		hr = pRT->CreateLayer(&pCamera->pLayer);
+		pCamera->_ppRT = &pRT;
+		hr = pRT->CreateLayer(&pCamera->_pLayer);
 	}
 	if (SUCCEEDED(hr)) {
-		pCamera->ppCurrentLayer = &currentLayer;
-		pCamera->refPoint = properties.referencePoint;
+		pCamera->_ppCurrentLayer = &currentLayer;
+		pCamera->_refPoint = properties.referencePoint;
 		if (std::find(cameras.begin(), cameras.end(), pCamera) == cameras.end()) {
 			cameras.push_back(pCamera);
 		}
@@ -1522,37 +1561,36 @@ HRESULT oppo::_ResourceManager::CreateCamera(Camera* pCamera, CameraProperties p
 }
 
 void oppo::_ResourceManager::DestroyBrush(Brush* pBrush) {
-	utility::SafeRelease(&pBrush->pBrush);
+	utility::SafeRelease(&pBrush->_pBrush);
 	utility::DeleteFromVector(brushes, pBrush);
 }
 void oppo::_ResourceManager::DestroyBitmap(Bitmap* pBitmap) {
-	utility::SafeRelease(&pBitmap->pBitmap);
-	pBitmap->fileName = "";
+	utility::SafeRelease(&pBitmap->_pBitmap);
+	pBitmap->_fileName = "";
 	utility::DeleteFromVector(bitmaps, pBitmap);
 }
 void oppo::_ResourceManager::DestroySpriteSheet(SpriteSheet* pSpriteSheet) {
-	utility::SafeRelease(&pSpriteSheet->pBitmap);
-	pSpriteSheet->fileName = "";
-	pSpriteSheet->pxSheetResolution = Size2D();
-	pSpriteSheet->pxSpriteResolution = Size2D();
-	pSpriteSheet->spriteCount = Size2D();
-	pSpriteSheet->padding = Rect();
+	utility::SafeRelease(&pSpriteSheet->_pBitmap);
+	pSpriteSheet->_fileName = "";
+	pSpriteSheet->_spriteSize = Size2D();
+	pSpriteSheet->_spriteCount = Size2D();
+	pSpriteSheet->_padding = Rect();
 	utility::DeleteFromVector(spriteSheets, pSpriteSheet);
 }
 void oppo::_ResourceManager::DestroySprite(Sprite* pSprite) {
-	pSprite->pSpriteSheet = nullptr;
+	pSprite->_pSpriteSheet = nullptr;
 	pSprite->rect = RectF();
 	pSprite->spriteIndex = Size2D();
 }
 void oppo::_ResourceManager::DestroyTextFormat(TextFormat* pTextFormat) {
-	utility::SafeRelease(&pTextFormat->pTextFormat);
+	utility::SafeRelease(&pTextFormat->_pTextFormat);
 	utility::DeleteFromVector(textFormats, pTextFormat);
 }
 void oppo::_ResourceManager::DestroyCamera(Camera* pCamera) {
-	utility::SafeRelease(&pCamera->pLayer);
-	pCamera->ppCurrentLayer = nullptr;
-	pCamera->ppRT = nullptr;
-	pCamera->layerParams = D2D1::LayerParameters();
+	utility::SafeRelease(&pCamera->_pLayer);
+	pCamera->_ppCurrentLayer = nullptr;
+	pCamera->_ppRT = nullptr;
+	pCamera->_layerParams = D2D1::LayerParameters();
 	utility::DeleteFromVector(cameras, pCamera);
 }
 
@@ -1708,95 +1746,33 @@ HRESULT oppo::_ResourceManager::LoadBitmapFromResource(PCWSTR resource, ID2D1Bit
 #pragma endregion
 
 #pragma region _Engine
-std::vector<HWND> oppo::_Engine::windows;
+oppo::_Engine* oppo::_Engine::_pInstance = nullptr;
 
 oppo::Result oppo::_Engine::AddWindow(Window* wnd, WindowProperties properties) {
-	// create a new random class name
-	wnd->NewClassName();
-
-	// set win32 window class properties
-	WNDCLASS wc = { };
-	wc.style = CS_DBLCLKS;
-	wc.lpfnWndProc = [](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT {
-		Window* pThis = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-		if (uMsg == WM_NCCREATE) {
-			CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-			pThis = static_cast<Window*>(pCreate->lpCreateParams);
-			SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
-		}
-
-		if (pThis) {
-			return pThis->WindowProc(hwnd, uMsg, wParam, lParam);
-		}
-
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	};
-
-	wc.hInstance = GetModuleHandle(NULL);
-	wc.lpszClassName = wnd->className;
-
-	RegisterClass(&wc);
-
-	// window size and position defaults
-	if (properties.size.width == 0) properties.size.width = CW_USEDEFAULT;
-	if (properties.size.height == 0) properties.size.height = CW_USEDEFAULT;
-
-	// create window
-	wnd->GameLoop = properties.GameLoop;
-	wnd->SetWndStateCreate();
-
-	wnd->hWnd = CreateWindowEx(
-		0,
-		wnd->className,
-		utility::StringToWString(properties.name).c_str(),
-		properties.style,
-		// Size and position: X, Y, Width, Height
-		CW_USEDEFAULT, CW_USEDEFAULT, properties.size.width, properties.size.height,
-		NULL,       // Parent window    
-		NULL,       // Menu
-		GetModuleHandle(NULL),  // Instance handle
-		wnd        // Additional application data
-	);
-
-	// check for errors
-	if (wnd->hWnd == NULL) {
+	HWND hWnd = wnd->Create(properties);
+	if (hWnd == NULL) {
 		return ERRORS::FAIL;
 	}
-
-	// set window properties
-	wnd->backgroundColor = properties.backgroundColor;
-	wnd->szMin = properties.minSize;
-	wnd->szMax = properties.maxSize;
-	wnd->SetFPS(properties.fps);
-	wnd->SetUPS(properties.ups);
-	wnd->SetAPS(properties.aps);
-	wnd->winID = properties.id;
-
-	// initialize timer thread
-	wnd->tGameLoopTimer = std::thread([wnd]() { wnd->GameLoopTimer(); });
-
-	// add hWnd for running
-	windows.push_back(wnd->hWnd);
-
+	_windows.push_back(hWnd);
 	return ERRORS::SUCCESS;
 }
 
 void oppo::_Engine::RemoveWindow(Window* wnd) {
-	wnd->tGameLoopTimer.join();
-	utility::DeleteFromVector(windows, wnd->hWnd);
-	if (windows.size() == 0) {
+	wnd->_tGameLoopTimer.join();
+	utility::DeleteFromVector(_windows, wnd->_hWnd);
+	if (_windows.size() == 0) {
 		PostQuitMessage(0);
 	}
 }
 
 void oppo::_Engine::Terminate() {
-	for (auto hWnd : windows) {
+	for (auto hWnd : _windows) {
 		DestroyWindow(hWnd);
 	}
 }
 
 void oppo::_Engine::Run() {
-	for (auto hWnd : windows) {
+	for (auto hWnd : _windows) {
 		ShowWindow(hWnd, SW_SHOWDEFAULT);
 	}
 
@@ -1807,17 +1783,23 @@ void oppo::_Engine::Run() {
 	}
 }
 
+oppo::_Engine* oppo::_Engine::GetInstance() {
+	if (_pInstance == nullptr) {
+		_pInstance = new _Engine();
+	}
+	return _pInstance;
+}
+
 oppo::Result oppo::CreateWindow(Window* wnd, WindowProperties properties) {
-	return _Engine::AddWindow(wnd, properties);
+	return _Engine::GetInstance()->AddWindow(wnd, properties);
 }
 
 void oppo::Run() {
-	_Engine::Run();
+	_Engine::GetInstance()->Run();
 }
 
 void oppo::Terminate() {
-	_Engine::Terminate();
+	_Engine::GetInstance()->Terminate();
 }
-
 
 #pragma endregion
