@@ -464,7 +464,13 @@ LRESULT CALLBACK oppo::Window::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, L
 		return 0;
 	}
 	case WM_SIZE: {
-		(*_ppRT)->Resize(D2D1::SizeU(LOWORD(lParam), HIWORD(lParam)));
+		D2D1_SIZE_U size = D2D1::SizeU(LOWORD(lParam), HIWORD(lParam));
+		(*_ppRT)->Resize(size);
+		if (_GameLoop) {
+			e.type = EVENTS::RESIZE;
+			e.as.resize.size = size;
+			_GameLoop(e);
+		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		return 0;
 	}

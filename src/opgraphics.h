@@ -175,7 +175,7 @@ namespace oppo {
 	class Effect {};
 	
 	/// <summary>
-	/// Reference position on the window for camera position.
+	/// Camera position reference relative to the window.
 	/// </summary>
 	enum class CAMERA_REFERENCE {
 		CENTER,
@@ -185,7 +185,7 @@ namespace oppo {
 		BOTTOM_RIGHT,
 	};
 	struct CameraProperties {
-		CAMERA_REFERENCE referencePoint;
+		CAMERA_REFERENCE referencePoint; // Camera position reference relative to the window.
 	};
 	class Camera {
 		/*TODO:

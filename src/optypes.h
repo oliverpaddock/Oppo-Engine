@@ -468,6 +468,9 @@ namespace oppo::utility {
 	struct _UpdateEvent {
 		double dt;
 	};
+	struct _ResizeEvent {
+		Size2D size;
+	};
 }
 
 namespace oppo {
@@ -497,6 +500,7 @@ namespace oppo {
 		// graphics
 		PAINT,
 		UPDATE,
+		RESIZE,
 	};
 
 	struct Event {
@@ -521,6 +525,7 @@ namespace oppo {
 			utility::_MouseScrollEvent mouseScroll;
 			utility::_PaintEvent paint;
 			utility::_UpdateEvent update;
+			utility::_ResizeEvent resize;
 		} as;
 	};
 }
