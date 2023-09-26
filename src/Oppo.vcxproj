@@ -145,6 +145,9 @@
   <ItemGroup>
     <ResourceCompile Include="Oppo.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Cursor.cur" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

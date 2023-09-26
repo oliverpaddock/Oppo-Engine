@@ -52,4 +52,9 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Cursor.cur">
+      <Filter>Source Files\example</Filter>
+    </None>
+  </ItemGroup>
 </Project>

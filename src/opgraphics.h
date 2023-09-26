@@ -29,6 +29,8 @@ namespace oppo::utility {
 
 	std::wstring StringToWString(const std::string& str);
 
+	void d2dSetCursor(HCURSOR hCursor);
+
 	template <typename T>
 	void DeleteFromVector(std::vector<T>& vec, const T& value) {
 		auto it = std::find(vec.begin(), vec.end(), value);
@@ -520,6 +522,9 @@ namespace oppo {
 		void SetMaximize(bool isMaximized);
 		void SetMinimize(bool isMinimized);
 		void SetFullscreen(bool isFullscreen);
+		void SetCursor(Cursor cur);
+		void SetCursor(CURSORS cur);
+		void SetCursorFromFile(const char* fileCur);
 
 		void SetScene(std::function<Result(Event)> newScene);
 
@@ -600,5 +605,8 @@ namespace oppo {
 	void Run();
 
 	void Terminate();
+
+	Cursor CreateCursor(const char* fileCur);
+	Cursor CreateCursorFromResource(LPCWSTR rc);
 }
 #pragma endregion

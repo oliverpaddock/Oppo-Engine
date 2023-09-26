@@ -9,6 +9,10 @@ std::wstring oppo::utility::StringToWString(const std::string& str)
 	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), &wstr[0], count);
 	return wstr;
 }
+
+void oppo::utility::d2dSetCursor(HCURSOR hCursor) {
+	SetCursor(hCursor);
+}
 #pragma endregion
 
 #pragma region Window
@@ -178,6 +182,18 @@ void oppo::Window::SetFullscreen(bool isFullscreen) {
 		SetWindowPlacement(_hWnd, &_wpPrev);
 		SetWindowPos(_hWnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 	}
+}
+
+void oppo::Window::SetCursor(Cursor cur) {
+	utility::d2dSetCursor(cur);
+}
+void oppo::Window::SetCursor(CURSORS cur) {
+	Cursor cursor = LoadCursor(NULL, reinterpret_cast<LPCWSTR>(static_cast<int>(cur)));
+	utility::d2dSetCursor(cursor);
+}
+void oppo::Window::SetCursorFromFile(const char* fileCur) {
+	HCURSOR cur = LoadCursorFromFile(utility::StringToWString(fileCur).c_str());
+	SetCursor(cur);
 }
 
 void oppo::Window::SetScene(std::function<Result(Event)> newScene) {
@@ -1806,6 +1822,16 @@ void oppo::Run() {
 
 void oppo::Terminate() {
 	_Engine::GetInstance()->Terminate();
+}
+
+oppo::Cursor oppo::CreateCursor(const char* fileCur) {
+	return LoadCursorFromFile(utility::StringToWString(fileCur).c_str());
+}
+oppo::Cursor oppo::CreateCursor(CURSORS cur) {
+	return LoadCursor(NULL, reinterpret_cast<LPCWSTR>(static_cast<int>(cur)));
+}
+oppo::Cursor oppo::CreateCursorFromResource(LPCWSTR rc) {
+	return LoadCursor(NULL, rc);
 }
 
 #pragma endregion

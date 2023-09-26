@@ -838,3 +838,35 @@ namespace oppo {
 }
 
 #pragma endregion
+
+#pragma region Cursors
+namespace oppo {
+	using Cursor = HCURSOR;
+
+	enum class CURSORS {
+		arrow = reinterpret_cast<int>(IDC_ARROW),
+		ibeam = reinterpret_cast<int>(IDC_IBEAM),
+		wait = reinterpret_cast<int>(IDC_WAIT),
+		cross = reinterpret_cast<int>(IDC_CROSS),
+		upArrow = reinterpret_cast<int>(IDC_UPARROW),
+		sizeNWSE = reinterpret_cast<int>(IDC_SIZENWSE),
+		sizeNESW = reinterpret_cast<int>(IDC_SIZENESW),
+		sizeWE = reinterpret_cast<int>(IDC_SIZEWE),
+		sizeNS = reinterpret_cast<int>(IDC_SIZENS),
+		sizeAll = reinterpret_cast<int>(IDC_SIZEALL),
+		no = reinterpret_cast<int>(IDC_NO),
+#if(WINVER >= 0x0500)
+		hand = reinterpret_cast<int>(IDC_HAND),
+#endif /* WINVER >= 0x0500 */
+		appStarting = reinterpret_cast<int>(IDC_APPSTARTING),
+#if(WINVER >= 0x0400)
+		help = reinterpret_cast<int>(IDC_HELP),
+#endif /* WINVER >= 0x0400 */
+
+#if(WINVER >= 0x0606)
+		pin = reinterpret_cast<int>(IDC_PIN),
+		person = reinterpret_cast<int>(IDC_PERSON),
+#endif /* WINVER >= 0x0606 */
+	};
+}
+#pragma endregion

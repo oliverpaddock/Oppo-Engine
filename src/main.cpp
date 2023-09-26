@@ -6,6 +6,7 @@
 using namespace oppo;
 
 Window wnd;
+Cursor cursor;
 
 Result NewScene(Event e) {
 	static Camera cam;
@@ -29,6 +30,10 @@ Result NewScene(Event e) {
 	}
 	case EVENTS::PAINT: {
 		cam.DrawShape(RectF(-300, -25, 300, 25), brush);
+		break;
+	}
+	case EVENTS::MOUSEMOVE: {
+		SetCursor(cursor);
 		break;
 	}
 	case EVENTS::KEYDOWN: {
@@ -91,5 +96,6 @@ int main() {
 	wp.id = 0; // id can be any number
 	wp.backgroundColor = COLORS::CORAL; // default background color
 	CreateWindow(&wnd, wp);
+	cursor = LoadCursor(NULL, IDC_SIZEALL);
 	Run();
 }
